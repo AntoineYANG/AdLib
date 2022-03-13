@@ -1,0 +1,23 @@
+{
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "espoirVersion": 1,
+  "contributors": [
+    "Kyoushou antoineyang99@gmail.com"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AntoineYANG/AdLib.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AntoineYANG/AdLib/issues"
+  },
+  "homepage": "https://github.com/AntoineYANG/AdLib/README.md",
+  "scripts": {},
+  "devDependencies": {},
+  "peerDependencies": {
+    "espoir-cli": "^1.2.1"
+  }
+}
