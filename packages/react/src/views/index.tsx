@@ -7,13 +7,18 @@ import {
   Route
 } from 'react-router-dom';
 
+import Homepage from '@views/homepage';
 
-const App: React.FC = () => (
-  <Router>
-    <Routes>
-      <Route path="/" element={ <></> } />
-    </Routes>
-  </Router>
-);
+
+const App: React.FC = React.memo(() => {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={ <Homepage /> } />
+      </Routes>
+    </Router>
+  );
+});
+
 
 export default App;

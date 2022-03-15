@@ -16,7 +16,9 @@
   },
   "homepage": "https://github.com/AntoineYANG/AdLib/README.md",
   "scripts": {},
-  "devDependencies": {},
+  "devDependencies": {
+    "espoir-cli": "^1.2.1"
+  },
   "peerDependencies": {
     "espoir-cli": "^1.2.1"
   }
