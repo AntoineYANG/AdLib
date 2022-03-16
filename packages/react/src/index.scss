@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-03-15 17:57:14 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-03-15 23:57:12
+ * @Last Modified time: 2022-03-16 19:29:52
  */
 
 body {
@@ -12,10 +12,12 @@ body {
   font-family: Menlo, Consolas, monospace;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  width: 100vw;
+  height: 100vh;
   overflow: hidden;
   background-color: #202020;
   color: rgb(232, 232, 232);
-  font-size: 14px;
+  font-size: 12px;
   line-height: 1.2;
   white-space: pre-wrap;
 }
@@ -47,4 +49,26 @@ code {
 
 .App-link {
   color: #61dafb;
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+  margin: 0 2px;
+  overflow: visible;
+  
+  &-thumb {
+    background-image: linear-gradient(
+      to right,
+      rgba(90,164,219,0.32) 6px,
+      #0000 6px
+    );
+  }
+
+  &-track {
+    background-image: linear-gradient(
+      to right,
+      rgba(127,127,127,0.16) 6px,
+      #0000 6px
+    );
+  }
 }

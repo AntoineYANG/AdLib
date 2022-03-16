@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-03-15 22:48:36 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-03-16 00:24:30
+ * @Last Modified time: 2022-03-16 19:31:32
  */
 
 const useShadow = (options: {
@@ -49,7 +49,7 @@ const useShadow = (options: {
     minHeight: '68px',
     transition: [
       'background-color', 'background-image', 'color'
-    ].map(n => `${n} 200ms`).join(', ')
+    ].map(n => `${n} 120ms`).join(', ')
   };
 };
 

@@ -15,6 +15,8 @@ _\<version description\>_
 
 ### react
 
++ 🌱 **Homepage UI.** - AntoineYANG(814602569@qq.com) 2022/3/16, on _master_
+
 + 🌱 **Init React app.** - AntoineYANG(814602569@qq.com) 2022/3/16, on _master_
 
 

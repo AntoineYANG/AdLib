@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-01-25 21:31:22 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-26 00:27:04
+ * @Last Modified time: 2022-03-16 19:50:01
  */
 'use strict';
 
@@ -105,7 +105,7 @@ const watch = ({
     
   ['SIGINT', 'SIGTERM'].forEach(sig => {
     process.on(sig, () => {
-      devServer.close();
+      devServer.stop();
       resolve(0);
     });
   });
