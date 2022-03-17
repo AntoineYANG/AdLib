@@ -22,3 +22,8 @@ _\<version description\>_
 + 🌱 **Init React app.** - AntoineYANG(814602569@qq.com) 2022/3/16, on _master_
 
 
+### react scripts
+
++ 🐞 **Error occured when /build/ dir does not exist, from `react.build`.** - AntoineYANG(814602569@qq.com) 2022/3/17, on _master_
+
+

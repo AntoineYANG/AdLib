@@ -1,0 +1,20 @@
+{
+  "files": {
+    "main.css": "D:/project/@github-KANATA/ad-lib/packages/react/static/css/main.01440027.css",
+    "main.js": "D:/project/@github-KANATA/ad-lib/packages/react/static/js/main.afcdb33d.js",
+    "static/media/icon_start_dark.png": "D:/project/@github-KANATA/ad-lib/packages/react/static/media/icon_start_dark.14051e95.png",
+    "static/media/icon_log_dark.png": "D:/project/@github-KANATA/ad-lib/packages/react/static/media/icon_log_dark.17fd50c5.png",
+    "static/media/icon_preference_dark.png": "D:/project/@github-KANATA/ad-lib/packages/react/static/media/icon_preference_dark.c31fc3da.png",
+    "static/media/icon_preference.png": "D:/project/@github-KANATA/ad-lib/packages/react/static/media/icon_preference.8635f65f.png",
+    "static/media/icon_log.png": "D:/project/@github-KANATA/ad-lib/packages/react/static/media/icon_log.a85f77a5.png",
+    "static/media/icon_start.png": "D:/project/@github-KANATA/ad-lib/packages/react/static/media/icon_start.c836e94e.png",
+    "index.html": "D:/project/@github-KANATA/ad-lib/packages/react/index.html",
+    "static/media/javascript,__webpack_public_path__ = __webpack_base_uri__ = htmlWebpackPluginPublicPath;": "D:/project/@github-KANATA/ad-lib/packages/react/static/media/javascript,__webpack_public_path__ = __webpack_base_uri__ = htmlWebpackPluginPublicPath;.1feff74f.bin",
+    "main.01440027.css.map": "D:/project/@github-KANATA/ad-lib/packages/react/static/css/main.01440027.css.map",
+    "main.afcdb33d.js.map": "D:/project/@github-KANATA/ad-lib/packages/react/static/js/main.afcdb33d.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.01440027.css",
+    "static/js/main.afcdb33d.js"
+  ]
+}
