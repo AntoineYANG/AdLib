@@ -1,8 +1,8 @@
 /*
  * @Author: Kanata You 
- * @Date: 2022-03-15 17:26:00 
+ * @Date: 2022-03-17 17:56:51 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-03-17 17:51:57
+ * @Last Modified time: 2022-03-17 17:57:40
  */
 
 import React from 'react';
@@ -85,7 +85,7 @@ const Homepage: React.FC = React.memo(() => {
   return (
     <Page darkMode={darkMode}>
       <PageHeader darkMode={darkMode}>
-        ad-lib
+        ad-lib IDEA
       </PageHeader>
       <PageBody darkMode={darkMode}>
         <CardList

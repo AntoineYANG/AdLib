@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-03-15 22:48:36 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-03-16 19:31:32
+ * @Last Modified time: 2022-03-17 17:27:19
  */
 
 const useShadow = (options: {
@@ -32,8 +32,8 @@ const useShadow = (options: {
     transform: `translate(${transform}, ${transform})`,
     backgroundImage: {
       flat: undefined,
-      concave: `linear-gradient(145deg, ${colorDarker}10 -20%, ${colorBrighter}10)`,
-      convex: `linear-gradient(145deg, ${colorBrighter}10, ${colorDarker}10)`,
+      concave: `linear-gradient(145deg, ${colorDarker}1a -20%, ${colorBrighter}1a)`,
+      convex: `linear-gradient(145deg, ${colorBrighter}1a, ${colorDarker}1a)`,
       pressed: undefined
     }[shape],
     boxShadow: `${
@@ -44,7 +44,7 @@ const useShadow = (options: {
       shape === 'pressed' ? 'inset ' : ''
     }-${size}px -${size}px ${size * distance * 2.4}px ${
       colorBrighter
-    }60`,
+    }40`,
     borderRadius: '34px',
     minHeight: '68px',
     transition: [

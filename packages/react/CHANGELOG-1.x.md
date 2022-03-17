@@ -1,6 +1,6 @@
 # react v1.x
 
-## 1.0.0 (2022/3/14 - 2022/3/16)
+## 1.0.0 (2022/3/14 - 2022/3/17)
 
 _\<version description\>_
 
@@ -14,6 +14,8 @@ _\<version description\>_
 
 
 ### react
+
++ 🌱 **Homepage > card_list ui & navigation.** - AntoineYANG(814602569@qq.com) 2022/3/17, on _master_
 
 + 🌱 **Homepage UI.** - AntoineYANG(814602569@qq.com) 2022/3/16, on _master_
 

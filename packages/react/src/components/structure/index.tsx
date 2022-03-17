@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-03-15 17:40:36 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-03-16 19:23:28
+ * @Last Modified time: 2022-03-17 17:00:27
  */
 
 import styled from 'styled-components';
@@ -66,3 +66,46 @@ export const PageBody = styled.main<{ darkMode: boolean }>(({ darkMode }) => ({
   transition: 'background-color 200ms',
   overflow: 'hidden scroll'
 }));
+
+export const ANI_HIDE_MS = 200;
+
+export const PageShowAnimation = styled.div`
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #000;
+  z-index: 999;
+  pointer-events: none;
+  animation: page-show ${ANI_HIDE_MS}ms forwards;
+
+  @keyframes page-show {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+`;
+
+export const PageHideAnimation = styled.div`
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #000;
+  z-index: 999;
+  animation: page-hide ${ANI_HIDE_MS}ms forwards;
+
+  @keyframes page-hide {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+`;
