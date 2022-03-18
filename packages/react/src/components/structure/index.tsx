@@ -2,9 +2,10 @@
  * @Author: Kanata You 
  * @Date: 2022-03-15 17:40:36 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-03-17 17:00:27
+ * @Last Modified time: 2022-03-18 22:46:45
  */
 
+import React from 'react';
 import styled from 'styled-components';
 
 import useShadow from '@utils/use-shadow';
@@ -24,10 +25,7 @@ export const Page = styled.div<{ darkMode: boolean }>(({ darkMode }) => ({
   backgroundColor: darkMode ? '#161c1d' : '#deedf8'
 }));
 
-/**
- * 顶部导航栏.
- */
-export const PageHeader = styled.nav<{ darkMode: boolean }>(({ darkMode }) => ({
+const _PageHeader = styled.nav<{ darkMode: boolean }>(({ darkMode }) => ({
   margin: '0 4vw 1vw',
   flexGrow: 0,
   flexShrink: 0,
@@ -51,6 +49,35 @@ export const PageHeader = styled.nav<{ darkMode: boolean }>(({ darkMode }) => ({
   transition: 'background-color 200ms',
   userSelect: 'none'
 }));
+
+const _PageTitle = styled.header<{ darkMode: boolean }>(({ darkMode }) => ({
+
+}));
+
+export interface PageHeaderProps {
+  darkMode: boolean;
+  pageName?: string;
+}
+
+/**
+ * 顶部导航栏.
+ */
+export const PageHeader: React.FC<PageHeaderProps> = ({
+  darkMode,
+  pageName
+}) => {
+  return (
+    <_PageHeader
+      darkMode={darkMode}
+    >
+      <_PageTitle
+        darkMode={darkMode}
+      >
+        {pageName ? `${pageName} - ad-lib` : 'ad-lib'}
+      </_PageTitle>
+    </_PageHeader>
+  )
+};
 
 /**
  * 页面主要内容.

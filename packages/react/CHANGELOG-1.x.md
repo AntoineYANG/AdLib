@@ -1,6 +1,6 @@
 # react v1.x
 
-## 1.0.0 (2022/3/14 - 2022/3/17)
+## 1.0.0 (2022/3/14 - 2022/3/19)
 
 _\<version description\>_
 
@@ -14,6 +14,8 @@ _\<version description\>_
 
 
 ### react
+
++ 🌱 **Append eslint.** - AntoineYANG(814602569@qq.com) 2022/3/19, on _master_
 
 + 🌱 **Homepage > card_list ui & navigation.** - AntoineYANG(814602569@qq.com) 2022/3/17, on _master_
 

@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-03-15 22:48:36 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-03-17 17:27:19
+ * @Last Modified time: 2022-03-18 22:36:48
  */
 
 const useShadow = (options: {
@@ -17,7 +17,7 @@ const useShadow = (options: {
     size: _size = 1,
     distance = 1
   } = options;
-  const size = 10 * _size;
+  const size = 2 * _size;
 
   const colorBrighter = darkMode ? '#3e3e3e' : '#fcfcfc';
   const colorDarker = darkMode ? '#000000' : '#020202';

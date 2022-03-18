@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-03-15 17:26:00 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-03-17 17:51:57
+ * @Last Modified time: 2022-03-19 00:14:48
  */
 
 import React from 'react';
@@ -65,7 +65,7 @@ export const HomepageContext = createContext({
  * 页面：首页.
  * 提供跳转练习页的能力.
  */
-const Homepage: React.FC = React.memo(() => {
+const Homepage: React.FC = React.memo(function Homepage () {
   const { colorScheme } = PreferenceContext.useContext();
   const { redirecting } = HomepageContext.useContext();
   const darkMode = colorScheme === 'dark';
@@ -84,9 +84,7 @@ const Homepage: React.FC = React.memo(() => {
 
   return (
     <Page darkMode={darkMode}>
-      <PageHeader darkMode={darkMode}>
-        ad-lib
-      </PageHeader>
+      <PageHeader darkMode={darkMode} />
       <PageBody darkMode={darkMode}>
         <CardList
           cards={[{
@@ -105,7 +103,7 @@ const Homepage: React.FC = React.memo(() => {
             picSrcDark: iconPrefDark,
             picSrcLight: iconPref,
             name: '偏好设置',
-            path: 'test',
+            path: 'preference',
             desc: '编辑你的自定义选项。'
           }]}
         />

@@ -15,7 +15,9 @@
     "url": "https://github.com/AntoineYANG/AdLib/issues"
   },
   "homepage": "https://github.com/AntoineYANG/AdLib/blob/main/packages/react/README.md",
-  "scripts": {},
+  "scripts": {
+    "lint": "eslint src -c configs/.eslintrc.json"
+  },
   "dependencies": {
     "@babel/core": "^7.16.12",
     "@babel/plugin-proposal-private-property-in-object": "^7.16.7",
@@ -23,12 +25,13 @@
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.4",
     "babel-loader": "^8.2.3",
     "babel-plugin-named-asset-import": "^0.3.8",
+    "babel-plugin-react-anonymous-display-name": "^0.1.0",
     "babel-preset-react-app": "^10.0.1",
     "browserslist": "^4.20.0",
     "case-sensitive-paths-webpack-plugin": "^2.4.0",
     "chalk": "^5.0.0",
     "css-loader": "^6.7.1",
-    "eslint": "^8.11.0",
+    "eslint": "^7.32.0",
     "eslint-config-react-app": "^7.0.0",
     "eslint-webpack-plugin": "^3.1.1",
     "file-loader": "^6.2.0",
@@ -60,6 +63,8 @@
     "@types/react-router-dom": ">=5",
     "@types/styled-components": "^5.1.24",
     "ajv": "^8.8.2",
+    "eslint-plugin-no-memo-displayname": "^0.0.1",
+    "eslint-plugin-react": "^7.29.4",
     "espoir-cli": "^1.2.1",
     "react-refresh": "^0.11.0",
     "style-loader": "^3.3.1",

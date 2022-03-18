@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-01-24 16:09:18 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-26 00:35:56
+ * @Last Modified time: 2022-03-19 00:21:32
  */
 'use strict';
 
@@ -29,7 +29,7 @@ const enableTS = fs.existsSync(
   env.resolvePathInPackage(appName, 'tsconfig.json')
 );
 
-const enableESLint = Boolean([
+const ESLintConfigFile = [
   ...fs.readdirSync(env.resolvePathInPackage(
     appName
   )),
@@ -41,9 +41,11 @@ const enableESLint = Boolean([
       )
     ) ? fs.readdirSync(env.resolvePathInPackage(
       appName, 'configs'
-    )) : []
+    )).map(n => path.join('configs', n)) : []
   ),
-].find(fn => /^\.eslintrc\.js$/.test(fn)));
+].find(fn => /^\.eslintrc\.(js|json)$/.test(fn));
+
+const enableESLint = Boolean(ESLintConfigFile);
 
 const moduleFileExtensions = [
   'web.mjs',
@@ -238,6 +240,7 @@ const useWebpackConfig = mode => {
                         },
                       },
                     },
+                    require.resolve('babel-plugin-react-anonymous-display-name'),
                   ]
                 ].filter(Boolean),
                 // This is a feature of `babel-loader` for webpack (not Babel itself).
@@ -482,28 +485,24 @@ const useWebpackConfig = mode => {
       }),
       // ESLint checking
       enableESLint && new ESLintPlugin({
-        // Plugin options
-          extensions:    [
-            'js', 'mjs', 'jsx', 'ts', 'tsx'
-          ],
-          formatter:     require.resolve('react-dev-utils/eslintFormatter'),
-          eslintPath:    require.resolve('eslint'),
-          failOnError:   !isDev,
-          context:       dir,
-          cache:         true,
-          cacheLocation: path.resolve(
-            env.resolvePath('node_modules'),
-            '.cache/.eslintcache'
-          ),
-          // ESLint class options
-          cwd:                      dir,
-          resolvePluginsRelativeTo: __dirname,
-          baseConfig:               {
-            extends: [require.resolve('eslint-config-react-app/base')],
-            rules:   {
-              'react/react-in-jsx-scope': 'error',
-            },
-          },
+        // eslint runtime: eslint@7
+        eslintPath:           require.resolve('eslint'),
+        rulePaths:            [ESLintConfigFile],
+        // lintDirtyModulesOnly: isDev,
+        extensions:    [
+          'js', 'mjs', 'jsx', 'ts', 'tsx'
+        ],
+        formatter:     require.resolve('react-dev-utils/eslintFormatter'),
+        failOnError:   !isDev,
+        context:       dir,
+        cache:         true,
+        cacheLocation: path.resolve(
+          env.resolvePath('node_modules'),
+          '.cache/.eslintcache'
+        ),
+        // ESLint class options
+        cwd:                      dir,
+        resolvePluginsRelativeTo: __dirname,
       }),
     ].filter(Boolean),
     // dev server console config

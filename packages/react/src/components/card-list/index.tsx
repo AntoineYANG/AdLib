@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-03-15 17:54:04 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-03-17 17:55:24
+ * @Last Modified time: 2022-03-19 00:00:29
  */
 
 import React from 'react';
@@ -203,14 +203,14 @@ export interface CardProps {
  * 组件：卡片.
  * 用作应用跳转.
  */
-const AppCard = React.memo<CardProps>(({
+const AppCard = React.memo<CardProps>(function AppCard ({
   picSrcLight, picSrcDark, name, path, desc
-}) => {
+}) {
   const { colorScheme } = PreferenceContext.useContext();
   const [pressing, setPressing] = React.useState(false);
   const [hovering, setHovering] = React.useState(false);
 
-  const { interactive, redirecting, hasHighlight } = HomepageContext.useContext();
+  const { interactive, redirecting } = HomepageContext.useContext();
 
   React.useEffect(() => {
     const cb = (ev: MouseEvent) => {
@@ -240,8 +240,6 @@ const AppCard = React.memo<CardProps>(({
   };
 
   const navigate = useNavigate();
-
-  const highlight = !hasHighlight || hovering || pressing;
 
   const onFocus = make(() => {
     setHovering(true);
@@ -283,7 +281,6 @@ const AppCard = React.memo<CardProps>(({
       onDragStart={e => e.preventDefault()}
       role="link"
       aria-label={name}
-      aria-description={desc}
     >
       <Card
         darkMode={colorScheme === 'dark'}
@@ -331,16 +328,11 @@ export interface CardListProps {
  * 组件：卡片列表.
  * 配置应用跳转卡片.
  */
-const CardList = React.memo<CardListProps>(({ cards }) => {
+const CardList = React.memo<CardListProps>(function CardList ({ cards }) {
   const { colorScheme } = PreferenceContext.useContext();
 
   return (
-    <Container
-    onDoubleClick={
-      () => PreferenceContext.actions.setColorScheme(
-        colorScheme === 'dark' ? 'light' : 'dark'
-      )
-    }>
+    <Container>
       <CardListContainer darkMode={colorScheme === 'dark'}>
         {
           cards.map((card, i) => (

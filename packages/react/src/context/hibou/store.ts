@@ -42,7 +42,8 @@ export default class Store<
   }[] = [];
 
   private listeners: {
-    [Name in keyof EE]?: {
+    /* eslint-disable-next-line no-unused-vars */
+    [_Name in keyof EE]?: {
       callback: (...args: Parameters<EE[keyof EE]>) => void;
       once: boolean;
     }[];
@@ -264,6 +265,7 @@ export default class Store<
     this.subscribers = this.subscribers.filter(subscriber => subscriber.callback !== callback);
   }
 
+  /* eslint-disable react-hooks/rules-of-hooks */
   useContext(deps?: Pointer<S>[]): Readonly<S> {
     const [state, setState] = React.useState<S>(this.state);
 
@@ -273,10 +275,11 @@ export default class Store<
       this.subscribe(() => setState(this.state), deps);
 
       return () => this.unsubscribe(callback);
-    }, []);
+    }, [deps]);
 
     return state;
   }
+  /* eslint-enable react-hooks/rules-of-hooks */
 
   listen<Name extends keyof EE>(eventName: Name, callback: (...args: Parameters<EE[Name]>) => void): void {
     this.listeners[eventName] = (

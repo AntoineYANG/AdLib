@@ -9,14 +9,16 @@ import {
 
 import Homepage from '@views/homepage';
 import IdeaPage from '@views/idea-page';
+import PreferencePage from '@views/preference-page';
 
 
-const App: React.FC = React.memo(() => {
+const App: React.FC = React.memo(function App () {
   return (
     <Router>
       <Routes>
         <Route path="/" element={ <Homepage /> } />
         <Route path="/idea" element={ <IdeaPage /> } />
+        <Route path="/preference" element={ <PreferencePage /> } />
       </Routes>
     </Router>
   );
