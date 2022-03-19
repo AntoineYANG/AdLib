@@ -34,7 +34,7 @@ key_words = {
 
 
 def start():
-  lang = ['ja', 'en-US', 'zh-CN'][0]
+  lang = ['ja', 'en-US', 'en-EN', 'zh-CN'][2]
 
   r = sr.Recognizer()
   m = sr.Microphone()

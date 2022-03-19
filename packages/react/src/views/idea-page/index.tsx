@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-03-17 17:56:51 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-03-19 00:15:37
+ * @Last Modified time: 2022-03-20 01:07:25
  */
 
 import React from 'react';
@@ -15,26 +15,20 @@ import {
   PageShowAnimation,
   PageHideAnimation
 } from '@components/structure';
-import CardList from '@components/card-list';
 import PreferenceContext from '@context/preference';
 
-import iconStart from '@public/images/icon_start.png';
-import iconStartDark from '@public/images/icon_start_dark.png';
-import iconLog from '@public/images/icon_log.png';
-import iconLogDark from '@public/images/icon_log_dark.png';
-import iconPref from '@public/images/icon_preference.png';
-import iconPrefDark from '@public/images/icon_preference_dark.png';
 import { createContext } from '@context/hibou/core';
+import AudioInputReceiver from '@utils/audio-input';
 
 
-interface IHomepageContext extends Record<string, any> {
+interface IIdeaPageContext extends Record<string, any> {
   /** 页面交互是否响应 */
   interactive: boolean;
   /** 重定向链接 */
   redirecting: null | string;
 }
 
-const defaultContext: IHomepageContext = {
+const defaultContext: IIdeaPageContext = {
   interactive: true,
   redirecting: null
 };
@@ -42,7 +36,7 @@ const defaultContext: IHomepageContext = {
 /**
  * 页面上下文.
  */
-export const HomepageContext = createContext({
+export const IdeaPageContext = createContext({
   init: defaultContext, 
   actions: {
     /**
@@ -62,15 +56,23 @@ export const HomepageContext = createContext({
 
 
 /**
- * 页面：首页.
- * 提供跳转练习页的能力.
+ * 页面：灵感页.
+ * 选择本次练习的话题，然后承接练习页.
  */
-const Homepage: React.FC = React.memo(function IdeaPage () {
+const IdeaPage: React.FC = React.memo(function IdeaPage () {
   const { colorScheme } = PreferenceContext.useContext();
-  const { redirecting } = HomepageContext.useContext();
+  const { redirecting } = IdeaPageContext.useContext();
   const darkMode = colorScheme === 'dark';
 
   const [isInit, setInit] = React.useState(true);
+  
+  const airRef = React.useRef<AudioInputReceiver>();
+
+  React.useEffect(() => {
+    airRef.current = new AudioInputReceiver({});
+  }, []);
+
+  console.log(airRef);
 
   React.useEffect(() => {
     setTimeout(() => {
@@ -78,7 +80,7 @@ const Homepage: React.FC = React.memo(function IdeaPage () {
     }, ANI_HIDE_MS);
     
     return () => {
-      HomepageContext.actions.reset();
+      IdeaPageContext.actions.reset();
     };
   }, []);
 
@@ -88,28 +90,10 @@ const Homepage: React.FC = React.memo(function IdeaPage () {
         darkMode={darkMode}
         pageName="idea"
       />
-      <PageBody darkMode={darkMode}>
-        <CardList
-          cards={[{
-            picSrcDark: iconStartDark,
-            picSrcLight: iconStart,
-            name: '开始',
-            path: 'idea',
-            desc: '开始一次练习。\n探索一个话题，并进行你的演讲。'
-          }, {
-            picSrcDark: iconLogDark,
-            picSrcLight: iconLog,
-            name: '日志',
-            path: 'logs',
-            desc: 'AdLib 记录了你在这台设备上进行过的所有练习。点击以查看你的练习日志。'
-          }, {
-            picSrcDark: iconPrefDark,
-            picSrcLight: iconPref,
-            name: '偏好设置',
-            path: 'test',
-            desc: '编辑你的自定义选项。'
-          }]}
-        />
+      <PageBody
+        darkMode={darkMode}
+        onDoubleClick={() => airRef.current?.close()}
+      >
       </PageBody>
       {isInit && (<PageShowAnimation />)}
       {redirecting && (<PageHideAnimation />)}
@@ -118,4 +102,4 @@ const Homepage: React.FC = React.memo(function IdeaPage () {
 });
 
 
-export default Homepage;
+export default IdeaPage;
