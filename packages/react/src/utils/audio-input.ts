@@ -2,44 +2,35 @@
  * @Author: Kanata You 
  * @Date: 2022-03-19 23:42:46 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-03-20 01:41:45
+ * @Last Modified time: 2022-03-20 21:11:03
  */
 
+import axios from 'axios';
+
 import useAlert from '@utils/use-alert';
-
-
-// declare class AudioWorkletProcessor {}
-
-// class RandomNoiseProcessor extends AudioWorkletProcessor {
-
-//   process(inputs: Float32Array[][], outputs: Float32Array[][], parameters: any): boolean {
-//     const output = outputs[0];
-
-//     output?.forEach((channel, j) => {
-//       for (let i = 0; i < channel.length; i++) {
-//         channel[i] = (inputs[0]?.[j]?.[i] ?? 0) + Math.random() * 2 - 1;
-//       }
-//     });
-    
-//     return true;
-//   }
-
-// }
-
-// registerProcessor('random-noise-processor', RandomNoiseProcessor);
+import downloadBlobs from './download-blobs';
 
 
 export interface AudioInputReceiverOption {
-  /** 缓存大小，默认 4096 */
-  bufferSize?: number;
-  /** 声道数量，默认 1 */
-  channelCount?: number;
+  /** 每个 Blob 的毫秒数，默认 10 */
+  timeSlice?: number;
   /** 设备完成加载，初始化完成 */
-  onLoad?: () => void;
+  onLoad?: (this: AudioInputReceiver) => void;
   /** 初始化失败 */
-  onDisabled?: (reason: DOMException) => void;
+  onFailed?: (reason: Error) => void;
   /** 主动结束 */
   onClose?: () => void;
+}
+
+export enum AudioInputReceiverState {
+  /** 媒体流关闭，或因无法修补的异常无法正常使用 */
+  CLOSED = -2,
+  /** 未初始化 */
+  UNINITIALIZED = -1,
+  /** 初始化完成，可以开始录制 */
+  READY = 0,
+  /** 录制中 */
+  RECORDING = 1,
 }
 
 /**
@@ -47,49 +38,201 @@ export interface AudioInputReceiverOption {
  */
 export default class AudioInputReceiver {
 
+  private _status: AudioInputReceiverState;
+
+  /**
+   * 组件状态.
+   */
+  get status() {
+    return this._status;
+  }
+
   /** 是否已启用 */
-  private _active: boolean;
-
   get active() {
-    return this._active;
+    return [
+      AudioInputReceiverState.READY,
+      AudioInputReceiverState.RECORDING
+    ].includes(this._status);
   }
 
-  /** 麦克风是否被禁用 */
-  private _disabled: boolean;
-
+  /** 是否被禁用 */
   get disabled() {
-    return this._disabled;
+    return AudioInputReceiverState.CLOSED === this._status;
   }
 
-  /** 缓存大小 */
-  private readonly bufferSize: number;
+  /** 上传设置 */
+  private streamOption: {
+    url: string;
+    mode: 'slice' | 'all';
+    span: number;
+  } | null;
 
-  /** 声道数量 */
-  private readonly channelCount: number;
+  /** 每个 Blob 的毫秒数 */
+  private readonly TIME_SLICE: number;
 
   private source: MediaStream | undefined;
+
+  private recorder: MediaRecorder | undefined;
+
+  /** 录制数据 */
+  private bufferedData: Blob[];
+
+  /** 已上传的长度 */
+  private streamedLength: number;
 
   private readonly onClose: (() => void) | undefined;
 
   constructor(option: AudioInputReceiverOption) {
-    this._active = false;
-    this._disabled = false;
+    this._status = AudioInputReceiverState.UNINITIALIZED;
 
-    this.bufferSize = option.bufferSize ?? 4096;
-    this.channelCount = option.channelCount ?? 1;
+    this.TIME_SLICE = option.timeSlice ?? 10;
 
     this.onClose = option.onClose;
 
+    this.bufferedData = [];
+    this.streamOption = null;
+    this.streamedLength = 0;
+    
+    this.init(option.onLoad, option.onFailed);
+  }
+
+  /**
+   * 开始录制.
+   */
+  start(): void {
+    if (!this.recorder) {
+      throw new Error('初始化未完成，无法进行录制。');
+    } else if (this._status !== AudioInputReceiverState.READY) {
+      throw new Error(`当前状态 [${this._status}] 无法开始录制。`);
+    }
+
+    this.recorder.start(this.TIME_SLICE);
+    this._status = AudioInputReceiverState.RECORDING;
+  }
+
+  /**
+   * 结束录制.
+   */
+  stop(): void {
+    if (this._status !== AudioInputReceiverState.RECORDING) {
+      throw new Error(`当前未在录制中。`);
+    }
+
+    this.recorder?.stop();
+    this.streamChunk();
+    this._status = AudioInputReceiverState.READY;
+  }
+
+  /**
+   * 清空已录制内容.
+   */
+  clear(): void {
+    this.bufferedData = [];
+    this.streamedLength = 0;
+  }
+
+  /**
+   * 关闭媒体流（不可逆）.
+   */
+  close(): void {
+    this.source?.getTracks().forEach(track => {
+      track.stop();
+      this.source?.removeTrack(track);
+    });
+
+    this._status = AudioInputReceiverState.CLOSED;
+    this.onClose?.();
+  }
+
+  /**
+   * 设置视频流上传接口.
+   */
+  useStream(
+    url: string,
+    mode: 'slice' | 'all' = 'slice',
+    span: number = 20
+  ): void {
+    this.streamOption = {
+      url,
+      mode,
+      span
+    };
+  }
+
+  /**
+   * 关闭视频流上传.
+   */
+  closeStream(): void {
+    this.streamOption = null;
+  }
+
+  download(): void {
+    if (this.bufferedData.length === 0) {
+      throw new Error('录制内容为空。');
+    }
+
+    console.log(this.bufferedData.length, this.streamedLength);
+    
+    downloadBlobs('test.mp3', this.bufferedData);
+  }
+
+  private async streamChunk() {
+    const nextCursor = this.streamedLength + (this.streamOption?.span ?? 1);
+
+    if (this.streamOption && this.bufferedData.length >= nextCursor) {
+      const chunk = this.bufferedData.slice(
+        this.streamOption.mode === 'slice' ? this.streamedLength : 0,
+        nextCursor
+      );
+      this.streamedLength = nextCursor;
+
+      // const fr = new FileReader();
+      // fr.readAsArrayBuffer(new Blob(chunk, {
+      //   type: 'audio/mp3'
+      //   // type: 'audio/x-wav'
+      // }));
+
+      const output = await this.getWavData(chunk);
+
+      const form = new FormData();
+      form.append('record', output, 'a.mp3');
+      axios.post(this.streamOption.url, form);
+
+      // const xhr = new XMLHttpRequest();
+      // xhr.open('POST', this.streamOption.url, true);
+      // xhr.overrideMimeType('application/octet-stream');
+      // xhr.setRequestHeader('Content-Type', 'text/plain')
+      // xhr.send(fr.result as ArrayBuffer);
+
+      // await axios.post(
+      //   this.streamOption.url,
+      //   fr.result as ArrayBuffer
+      // ).then(res => {
+      //   console.log(res);
+      // });
+
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * 初始化 MediaStream 和 MediaRecorder 实例.
+   */
+  async init(
+    onLoad?: (this: AudioInputReceiver) => void,
+    onFailed?: (reason: Error) => void
+  ): Promise<void> {
     /**
      * @see https://developer.mozilla.org/zh-CN/docs/Web/API/MediaDevices/getUserMedia
      */
-    navigator.mediaDevices.getUserMedia({
+    await navigator.mediaDevices.getUserMedia({
       audio: true
     }).then(stream => {
       this.source = stream;
-      option.onLoad?.();
     }).catch((reason: DOMException) => {
-      this._disabled = true;
+      this._status = AudioInputReceiverState.CLOSED;
 
       switch (reason.name ?? 'unknown') {
         // 中止错误
@@ -192,24 +335,9 @@ export default class AudioInputReceiver {
         }
       }
 
-      option.onDisabled?.(reason);
-    });
-  }
-
-  /**
-   * 关闭媒体流（不可逆）.
-   */
-  close(): void {
-    this.source?.getTracks().forEach(track => {
-      track.stop();
-      this.source?.removeTrack(track);
+      onFailed?.(reason);
     });
 
-    this._active = false;
-    this.onClose?.();
-  }
-
-  listen(): void {
     if (this.source) {
       // @see https://juejin.cn/post/6844903953381982222#heading-3
 
@@ -218,17 +346,156 @@ export default class AudioInputReceiver {
   
       /** 声音输入 */
       const audioInput = context.createMediaStreamSource(this.source);
-      // await context.audioWorklet.addModule('random-noise-processor.js')
 
       audioInput.connect(context.destination);
 
-      // TODO:
+      try {
+        /** 录制实例 */
+        const recorder = ((): MediaRecorder => {
+          // 兼容媒体类型
+          for (const option of ['audio/webm', 'audio/mp3']) {
+            try {
+              const mr = new MediaRecorder(this.source as MediaStream, {
+                mimeType: option
+              });
 
-      // /** 缓存节点 */
-      // const processor = new AudioWorkletNode(context, 'recorder');
-      // context.createMediaStreamSource
-      // processor.connect(context.destination);
+              return mr;
+            } catch {
+              continue;
+            }
+          }
+
+          throw new Error('无法正确实例化 MediaRecorder 对象');
+        })();
+
+        this.recorder = recorder;
+
+        this.bufferedData = [];
+        this.streamedLength = 0;
+
+        recorder.ondataavailable = ev => {
+          if ((ev.data?.size ?? 0) > 0) {
+            this.bufferedData.push(ev.data);
+
+            this.streamChunk();
+          }
+        };
+
+        this._status = AudioInputReceiverState.READY;
+        onLoad?.call(this);
+      } catch (error) {
+        this._status = AudioInputReceiverState.CLOSED;
+        onFailed?.(error);
+      }
+    } else {
+      this._status = AudioInputReceiverState.CLOSED;
     }
+  }
+
+  private async getWavData(
+    blobs: Blob[],
+    inputSampleRate: number = 8000,
+    outputSampleRate: number = 8000,
+    inputSampleBits: 8 | 16 = 16,
+    outputSampleBits: 8 | 16 = 16,
+
+  ) {
+    return new Blob(blobs, { type: 'audio/mp3' });
+//     const sampleRate = Math.min(inputSampleRate, outputSampleRate);
+//     const sampleBits = Math.min(inputSampleBits, outputSampleBits); 
+
+//     const bytes = await new Promise<Float32Array>(resolve => {
+//       const fr = new FileReader();
+//       fr.readAsArrayBuffer(new Blob(blobs));
+
+//       fr.onload = () => {
+//         const d = fr.result as ArrayBuffer;
+//         const size = Math.floor(d.byteLength / 4) * 4;
+
+//         const fa = new Float32Array(d.slice(0, size));
+
+//         return resolve(new Float32Array(fa));
+//       };
+//     });
+
+//     const dataLength = bytes.length * (sampleBits / 8);
+//     const buffer = new ArrayBuffer(44 + dataLength);
+//     const data = new DataView(buffer);
+    
+//     let offset = 0;
+//     const writeString = (str: string) => {
+//       for (let i = 0; i < str.length; i += 1) {
+//         data.setUint8(offset + i, str.charCodeAt(i));
+//       }
+//     };
+//     // 资源交换文件标识符
+//     writeString('RIFF');
+//     offset += 4;
+//     // 下个地址开始到文件尾总字节数,即文件大小-8
+//     data.setUint32(offset, 36 + dataLength, true);
+//     offset += 4;
+//     // WAV文件标志
+//     writeString('WAVE');
+//     offset += 4;
+//     // 波形格式标志
+//     writeString('fmt ');
+//     offset += 4;
+//     // 过滤字节,一般为 0x10 = 16
+//     data.setUint32(offset, 16, true);
+//     offset += 4;
+//     // 格式类别 (PCM形式采样数据)
+//     data.setUint16(offset, 1, true);
+//     offset += 2;
+//     // 通道数
+//     const channelCount = 1;
+//     data.setUint16(offset, channelCount, true);
+//     offset += 2;
+//     // 采样率,每秒样本数,表示每个通道的播放速度
+//     data.setUint32(offset, sampleRate, true);
+//     offset += 4;
+//     // 波形数据传输率 (每秒平均字节数) 单声道×每秒数据位数×每样本数据位/8
+//     data.setUint32(offset, channelCount * sampleRate * (sampleBits / 8), true);
+//     offset += 4;
+//     // 快数据调整数 采样一次占用字节数 单声道×每样本的数据位数/8
+//     data.setUint16(offset, channelCount * (sampleBits / 8), true);
+//     offset += 2;
+//     // 每样本数据位数
+//     data.setUint16(offset, sampleBits, true);
+//     offset += 2;
+//     // 数据标识符
+//     writeString('data');
+//     offset += 4;
+//     // 采样数据总数,即数据总大小
+//     data.setUint32(offset, dataLength, true);
+//     offset += 4;
+//     // 写入采样数据   
+//     const output = this.reshapeWavData(sampleBits, offset, bytes, data);
+// //                var wavd = new Int8Array(data.buffer.byteLength);
+// //                var pos = 0;
+// //                for (var i = 0; i < data.buffer.byteLength; i++, pos++) {
+// //                    wavd[i] = data.getInt8(pos);
+// //                }                
+// //                return wavd;
+
+//     return new Blob([output], { type: 'audio/wav' });
+  }
+
+  private reshapeWavData(sampleBits: number, offset: number, iBytes: Float32Array, oData: DataView) {
+    if (sampleBits === 8) {
+      for (let i = 0; i < iBytes.length; i++, offset++) {
+        const s = Math.max(-1, Math.min(1, iBytes[i] as number));
+        let val = s < 0 ? s * 0x8000 : s * 0x7fff;
+        val = Math.floor(255 / (65535 / (val + 32768)));
+        oData.setInt8(offset, val);
+      }
+    } else {
+      for (let i = 0; i < iBytes.length; i++, offset += 2) {
+          var s = Math.max(-1, Math.min(1, iBytes[i] as number));
+          oData.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+      }
+    }
+    
+    return oData;
   }
 
 }

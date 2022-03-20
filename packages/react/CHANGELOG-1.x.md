@@ -15,6 +15,8 @@ _\<version description\>_
 
 ### react
 
++ 🌱 **Build node server.** - AntoineYANG(814602569@qq.com) 2022/3/20, on _master_
+
 + 🌱 **Audio-input (in processing).** - AntoineYANG(814602569@qq.com) 2022/3/20, on _master_
 
 + 🌱 **Append eslint.** - AntoineYANG(814602569@qq.com) 2022/3/19, on _master_
@@ -29,5 +31,10 @@ _\<version description\>_
 ### react scripts
 
 + 🐞 **Error occured when /build/ dir does not exist, from `react.build`.** - AntoineYANG(814602569@qq.com) 2022/3/17, on _master_
+
+
+### node-client
+
++ 🌱 **Build node server.** - AntoineYANG(814602569@qq.com) 2022/3/20, on _master_
 
 

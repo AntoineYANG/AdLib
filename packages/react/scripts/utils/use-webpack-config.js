@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-01-24 16:09:18 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-03-19 00:21:32
+ * @Last Modified time: 2022-03-20 16:08:57
  */
 'use strict';
 
@@ -17,6 +17,7 @@ import('chalk').then(mod => chalk = mod.default);
 const loadAliases = require('./load-aliases');
 const loadEnvVars = require('./load-env-vars');
 const useStyleLoaders = require('./use-style-loaders');
+const useProxyConfig = require('./use-proxy-config');
 
 const { name: appName } = require('../../package.json');
 const paths = require('../../configs/path.json');
@@ -119,6 +120,10 @@ const useWebpackConfig = mode => {
       production: enableSourceMap ? 'source-map' : false,
       development: 'cheap-module-source-map'
     }[mode] ?? false,
+    // dev server
+    devServer: isDev ? {
+      proxy: useProxyConfig()
+    } : undefined,
     // app entry
     entry,
     // output
@@ -158,7 +163,16 @@ const useWebpackConfig = mode => {
       fallback: {
         // webpack < 5 used to include polyfills for node.js core modules by default.
         // This is no longer the case.
-        url: false
+        url: false,
+        zlib: false,
+        stream: false,
+        string_decoder: false,
+        crypto: false,
+        querystring: false,
+        util: false,
+        path: false,
+        http: false,
+        buffer: false,
       },
       // module aliases
       alias: loadAliases(),

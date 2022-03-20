@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-03-17 17:56:51 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-03-20 01:07:25
+ * @Last Modified time: 2022-03-20 21:07:38
  */
 
 import React from 'react';
@@ -69,10 +69,22 @@ const IdeaPage: React.FC = React.memo(function IdeaPage () {
   const airRef = React.useRef<AudioInputReceiver>();
 
   React.useEffect(() => {
-    airRef.current = new AudioInputReceiver({});
-  }, []);
+    airRef.current = airRef.current ?? new AudioInputReceiver({
+      onLoad(this) {
+        this.start();
+        this.useStream(
+          '/audio-upload',
+          'all'
+        );
 
-  console.log(airRef);
+        setTimeout(() => {
+          this.stop();
+          this.closeStream();
+          this.close();
+        }, 4000); // FIXME:
+      }
+    });
+  }, []);
 
   React.useEffect(() => {
     setTimeout(() => {
