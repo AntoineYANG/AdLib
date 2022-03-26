@@ -1,0 +1,51 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": [
+    "./src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    ".modules"
+  ],
+  "compilerOptions": {
+    "baseUrl": "src",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "paths": {
+      "@src/*": [
+        "*"
+      ]
+    },
+    "declaration": false,
+    "preserveConstEnums": true,
+    "removeComments": false,
+    "sourceMap": false,
+    "allowJs": false,
+    "resolveJsonModule": true,
+    "target": "ESNext",
+    "isolatedModules": true,
+    "allowUnusedLabels": false,
+    "alwaysStrict": true,
+    "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
+    "strict": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": true,
+    "useUnknownInCatchVariables": false,
+    "rootDirs": [
+      "src/",
+      "../../node_modules/"
+    ],
+    "typeRoots": [
+      "../../node_modules/@types/"
+    ]
+  }
+}

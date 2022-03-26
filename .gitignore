@@ -16,3 +16,6 @@ node_modules/
 
 # Python cache
 __pycache__
+
+# Temporary files
+temp

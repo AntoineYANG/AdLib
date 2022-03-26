@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-03-17 17:56:51 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-03-20 21:07:38
+ * @Last Modified time: 2022-03-26 17:53:34
  */
 
 import React from 'react';
@@ -74,15 +74,17 @@ const IdeaPage: React.FC = React.memo(function IdeaPage () {
         this.start();
         this.useStream(
           '/audio-upload',
-          'all'
+          'all',
+          10
         );
 
         setTimeout(() => {
           this.stop();
           this.closeStream();
           this.close();
-        }, 4000); // FIXME:
-      }
+        }, 12000); // FIXME:
+      },
+      timeSlice: 20
     });
   }, []);
 
@@ -106,6 +108,15 @@ const IdeaPage: React.FC = React.memo(function IdeaPage () {
         darkMode={darkMode}
         onDoubleClick={() => airRef.current?.close()}
       >
+        <div id="resp" style={{
+          flexGrow: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '2rem',
+          lineHeight: '1.6em'
+        }} ></div>
       </PageBody>
       {isInit && (<PageShowAnimation />)}
       {redirecting && (<PageHideAnimation />)}

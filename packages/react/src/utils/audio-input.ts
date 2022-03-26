@@ -2,10 +2,11 @@
  * @Author: Kanata You 
  * @Date: 2022-03-19 23:42:46 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-03-20 21:11:03
+ * @Last Modified time: 2022-03-26 17:49:30
  */
 
 import axios from 'axios';
+import { nanoid } from 'nanoid';
 
 import useAlert from '@utils/use-alert';
 import downloadBlobs from './download-blobs';
@@ -31,6 +32,26 @@ export enum AudioInputReceiverState {
   READY = 0,
   /** 录制中 */
   RECORDING = 1,
+}
+
+export interface AudioParseResp {
+  message: 'ok' | 'failed';
+  fileName: string;
+  timeInfo: {
+    receiveTime: number;
+    settleTime: number;
+    serverCost: number;
+  };
+  parsed: [
+    {
+      transcript: string;
+      confidence: number;
+    }?,
+    ...({
+      transcript: string;
+    })[]
+  ];
+  parseError: { message: string } | null;
 }
 
 /**
@@ -186,30 +207,42 @@ export default class AudioInputReceiver {
       );
       this.streamedLength = nextCursor;
 
-      // const fr = new FileReader();
-      // fr.readAsArrayBuffer(new Blob(chunk, {
-      //   type: 'audio/mp3'
-      //   // type: 'audio/x-wav'
-      // }));
+      const fileName = nanoid(10) + '.webm';
 
-      const output = await this.getWavData(chunk);
+      const blob = new Blob(chunk, { type: 'audio/webm' });
 
-      const form = new FormData();
-      form.append('record', output, 'a.mp3');
-      axios.post(this.streamOption.url, form);
+      const formData = new FormData();
+      formData.append('excelFile', blob);
+      formData.append('fileName', fileName);
 
-      // const xhr = new XMLHttpRequest();
-      // xhr.open('POST', this.streamOption.url, true);
-      // xhr.overrideMimeType('application/octet-stream');
-      // xhr.setRequestHeader('Content-Type', 'text/plain')
-      // xhr.send(fr.result as ArrayBuffer);
+      await axios.post<AudioParseResp>(
+        this.streamOption.url, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      ).then(({ data }) => {
+        const container = document.getElementById('resp') as HTMLDivElement;
 
-      // await axios.post(
-      //   this.streamOption.url,
-      //   fr.result as ArrayBuffer
-      // ).then(res => {
-      //   console.log(res);
-      // });
+        for (let i = container.childElementCount - 1; i >= 0; i--) {
+          container.removeChild(container.childNodes.item(i));
+        }
+        
+        data.parsed.forEach((d, i) => {
+          const node = document.createElement(
+            'p'
+          );
+
+          node.style.fontSize = '2rem';
+          node.style.lineHeight = '1.6em';
+          node.style.margin = '0';
+          node.style.fontWeight = i ? 'normal' : '550';
+
+          node.textContent = d?.transcript ?? '';
+
+          container.appendChild(node);
+        });
+      });
 
       return true;
     }
@@ -390,112 +423,6 @@ export default class AudioInputReceiver {
     } else {
       this._status = AudioInputReceiverState.CLOSED;
     }
-  }
-
-  private async getWavData(
-    blobs: Blob[],
-    inputSampleRate: number = 8000,
-    outputSampleRate: number = 8000,
-    inputSampleBits: 8 | 16 = 16,
-    outputSampleBits: 8 | 16 = 16,
-
-  ) {
-    return new Blob(blobs, { type: 'audio/mp3' });
-//     const sampleRate = Math.min(inputSampleRate, outputSampleRate);
-//     const sampleBits = Math.min(inputSampleBits, outputSampleBits); 
-
-//     const bytes = await new Promise<Float32Array>(resolve => {
-//       const fr = new FileReader();
-//       fr.readAsArrayBuffer(new Blob(blobs));
-
-//       fr.onload = () => {
-//         const d = fr.result as ArrayBuffer;
-//         const size = Math.floor(d.byteLength / 4) * 4;
-
-//         const fa = new Float32Array(d.slice(0, size));
-
-//         return resolve(new Float32Array(fa));
-//       };
-//     });
-
-//     const dataLength = bytes.length * (sampleBits / 8);
-//     const buffer = new ArrayBuffer(44 + dataLength);
-//     const data = new DataView(buffer);
-    
-//     let offset = 0;
-//     const writeString = (str: string) => {
-//       for (let i = 0; i < str.length; i += 1) {
-//         data.setUint8(offset + i, str.charCodeAt(i));
-//       }
-//     };
-//     // 资源交换文件标识符
-//     writeString('RIFF');
-//     offset += 4;
-//     // 下个地址开始到文件尾总字节数,即文件大小-8
-//     data.setUint32(offset, 36 + dataLength, true);
-//     offset += 4;
-//     // WAV文件标志
-//     writeString('WAVE');
-//     offset += 4;
-//     // 波形格式标志
-//     writeString('fmt ');
-//     offset += 4;
-//     // 过滤字节,一般为 0x10 = 16
-//     data.setUint32(offset, 16, true);
-//     offset += 4;
-//     // 格式类别 (PCM形式采样数据)
-//     data.setUint16(offset, 1, true);
-//     offset += 2;
-//     // 通道数
-//     const channelCount = 1;
-//     data.setUint16(offset, channelCount, true);
-//     offset += 2;
-//     // 采样率,每秒样本数,表示每个通道的播放速度
-//     data.setUint32(offset, sampleRate, true);
-//     offset += 4;
-//     // 波形数据传输率 (每秒平均字节数) 单声道×每秒数据位数×每样本数据位/8
-//     data.setUint32(offset, channelCount * sampleRate * (sampleBits / 8), true);
-//     offset += 4;
-//     // 快数据调整数 采样一次占用字节数 单声道×每样本的数据位数/8
-//     data.setUint16(offset, channelCount * (sampleBits / 8), true);
-//     offset += 2;
-//     // 每样本数据位数
-//     data.setUint16(offset, sampleBits, true);
-//     offset += 2;
-//     // 数据标识符
-//     writeString('data');
-//     offset += 4;
-//     // 采样数据总数,即数据总大小
-//     data.setUint32(offset, dataLength, true);
-//     offset += 4;
-//     // 写入采样数据   
-//     const output = this.reshapeWavData(sampleBits, offset, bytes, data);
-// //                var wavd = new Int8Array(data.buffer.byteLength);
-// //                var pos = 0;
-// //                for (var i = 0; i < data.buffer.byteLength; i++, pos++) {
-// //                    wavd[i] = data.getInt8(pos);
-// //                }                
-// //                return wavd;
-
-//     return new Blob([output], { type: 'audio/wav' });
-  }
-
-  private reshapeWavData(sampleBits: number, offset: number, iBytes: Float32Array, oData: DataView) {
-    if (sampleBits === 8) {
-      for (let i = 0; i < iBytes.length; i++, offset++) {
-        const s = Math.max(-1, Math.min(1, iBytes[i] as number));
-        let val = s < 0 ? s * 0x8000 : s * 0x7fff;
-        val = Math.floor(255 / (65535 / (val + 32768)));
-        oData.setInt8(offset, val);
-      }
-    } else {
-      for (let i = 0; i < iBytes.length; i++, offset += 2) {
-          var s = Math.max(-1, Math.min(1, iBytes[i] as number));
-          oData.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
-      }
-    }
-    
-    return oData;
   }
 
 }

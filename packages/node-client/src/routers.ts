@@ -2,12 +2,19 @@
  * @Author: Kanata You 
  * @Date: 2022-03-20 17:06:20 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-03-20 21:16:02
+ * @Last Modified time: 2022-03-26 17:35:30
  */
 
 import type { Express } from 'express';
+import { execSync } from 'child_process';
 let fs: typeof import('fs');
 import('fs').then(_fs => fs = _fs);
+let path: typeof import('path');
+import('path').then(_path => path = _path);
+let multiparty: typeof import('multiparty');
+import('multiparty').then(_multiparty => multiparty = _multiparty);
+
+import { TEMP_DIR } from '.';
 
 
 const useRouters = (app: Express) => {
@@ -16,19 +23,77 @@ const useRouters = (app: Express) => {
   });
 
   app.post('/audio-upload', (req, res) => {
-    req.setEncoding('binary');
-    let chunks = '';
-    req.on('data', (chunk) => {
-      if (chunk) {
-        chunks += chunk;
+    const receiveTime = Date.now();
+    const form = new multiparty.Form({ uploadDir: TEMP_DIR });
+
+    form.parse(req, (err, { fileName, lang='en-EN' }, files) => {
+      const settleTime = Date.now();
+
+      const timeInfo = {
+        receiveTime,
+        settleTime,
+        serverCost: settleTime - receiveTime
+      };
+
+      if (err) {
+        res.statusCode = 500;
+
+        res.json({
+          message: 'failed',
+          clause: err,
+          timeInfo
+        });
+      } else {
+        res.statusCode = 200;
+
+        const prevPath = path.resolve(
+          files.excelFile[0].path
+        );
+        const nextPath = path.resolve(
+          TEMP_DIR, fileName[0]
+        );
+
+        fs.renameSync(prevPath, nextPath);
+
+        let parsed: [
+          {
+            transcript: string;
+            confidence: number;
+          }?,
+          ...({
+            transcript: string;
+          })[]
+        ] = [];
+        let parseError: { message: string } | null = null;
+
+        try {
+          const output = (
+            execSync(
+              `chcp 65001 & ${
+                'E:/Anaconda/envs/ad-lib/python.exe'
+              } ../engine/src/parse.py ${nextPath} ${lang}`,
+              {
+                encoding: 'utf-8'
+              }
+            ).split(/[\r\n]+/)[1]
+            ?? '[]'
+          ).replace(/'/g, '"');
+
+          parsed = JSON.parse(output);
+        } catch (error) {
+          parseError = {
+            message: error.message
+          };
+        }
+
+        res.json({
+          message: 'ok',
+          fileName: nextPath,
+          timeInfo,
+          parsed,
+          parseError
+        });
       }
-    });
-    chunks = chunks.replace(
-      /(^[.\r\n]*Content-Type: .*(\r\n){2})|([\r\n]*WebKitFormBoundary.*[\r\n]*$)/g,
-      ''
-    );
-    req.on('end', () => {
-      fs.writeFileSync('video.wav', chunks);
     });
   });
 };
