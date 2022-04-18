@@ -11,12 +11,18 @@
   "contributors": [
     "Kyosho antoineyang99@gmail.com"
   ],
+  "main": "packages/react/tasks/electron/main.js",
   "bugs": {
     "url": "https://github.com/AntoineYANG/AdLib/issues"
   },
   "homepage": "https://github.com/AntoineYANG/AdLib/blob/main/packages/react/README.md",
   "scripts": {
-    "lint": "eslint src -c configs/.eslintrc.json"
+    "lint": "eslint src -c configs/.eslintrc.json",
+    "preview": "serve build",
+    "electron": "electron ./tasks/electron/main.js",
+    "electron:build-win32": "node ../../node_modules/electron-builder/cli.js build --win --x64 -c ./packages/react/configs/electron-builder.config.json --projectDir ../..",
+    "electron:build-all": "node ../../node_modules/electron-builder/cli.js build --linux --win --x64 -c ./packages/react/configs/electron-builder.config.json --projectDir ../..",
+    "electron:build-mac": "node ../../node_modules/electron-builder/cli.js build --mac -c ./packages/react/configs/electron-builder.config.json --projectDir ../.."
   },
   "dependencies": {
     "@babel/core": "^7.16.12",
@@ -32,6 +38,8 @@
     "case-sensitive-paths-webpack-plugin": "^2.4.0",
     "chalk": "^5.0.0",
     "css-loader": "^6.7.1",
+    "electron": "^18.0.4",
+    "electron-builder": "^23.0.6",
     "eslint": "^7.32.0",
     "eslint-config-react-app": "^7.0.0",
     "eslint-webpack-plugin": "^3.1.1",
@@ -45,9 +53,9 @@
     "postcss-normalize": "^10.0.1",
     "postcss-preset-env": "^7.4.2",
     "postcss-safe-parser": "^6.0.0",
-    "react": "18.0.0-rc.0",
+    "react": "^18.0.0",
     "react-dev-utils": "^12.0.0",
-    "react-dom": "18.0.0-rc.0",
+    "react-dom": "^18.0.0",
     "react-router-dom": "^6.2.1",
     "resolve": "^1.22.0",
     "resolve-url-loader": "^5.0.0",
@@ -59,8 +67,9 @@
     "webpack-manifest-plugin": "^5.0.0"
   },
   "devDependencies": {
-    "@types/react": ">=17",
-    "@types/react-dom": ">=17",
+    "@types/electron": "^1.6.10",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
     "@types/react-router-dom": ">=5",
     "@types/styled-components": "^5.1.24",
     "ajv": "^8.8.2",
@@ -82,14 +91,10 @@
   "browserslist": {
     "production": [
       "Chrome >= 49",
-      "Chrome Android >= 49",
       "Firefox >= 43",
-      "Firefox for Android >= 43",
       "Edge >= 79",
       "Opera >= 36",
-      "Opera Android >= 36",
       "Safari >= 14",
-      "Safari on iOS >= 14",
       "not op_mini all"
     ],
     "development": [

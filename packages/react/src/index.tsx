@@ -6,15 +6,14 @@
  */
      
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
 
 import App from '@views';
 
 import './index.scss';
 
 
-const container = document.getElementById('root');
-// @ts-ignore
+const container = document.getElementById('root') as HTMLDivElement;
 const root = ReactDOM.createRoot(container);
 
 root.render(

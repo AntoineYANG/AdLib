@@ -19,3 +19,6 @@ __pycache__
 
 # Temporary files
 temp
+
+# Electron Builder Cache
+build-cache

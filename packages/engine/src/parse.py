@@ -25,7 +25,7 @@ def parse(webm, lang='en-EN'):
     # print("Set minimum energy threshold to {}".format(r.energy_threshold))
 
     try:
-      res = r.recognize_google(audio, show_all=True, language='ja')
+      res = r.recognize_google(audio, show_all=True, language='zh-cn')
 
       if type(res) is list and len(res) == 0:
         return '[]'

@@ -31,5 +31,10 @@ const PreferenceContext = createContext({
   }
 });
 
+document.body.addEventListener('dblclick', () => {
+  PreferenceContext.actions.setColorScheme(
+    PreferenceContext.state.colorScheme === 'light' ? 'dark' : 'light'
+  )
+})
 
 export default PreferenceContext;

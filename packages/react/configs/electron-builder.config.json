@@ -1,0 +1,36 @@
+{
+  "appId": "com.kyusho.${name}",
+  "productName": "ad-lib",
+  "directories": {
+    "output": "packages/react/electron-build"
+  },
+  "electronVersion": "18.0.4",
+  "electronDownload": {
+    "platform": "win32",
+    "strictSSL": false,
+    "isVerifyChecksum": false,
+    "cache": "build-cache",
+    "mirror": "https://npm.taobao.org/mirrors/electron-builder-binaries/"
+  },
+  "mac": {
+    "category": "public.app-category.education",
+    "icon": "electron-build/icon.png",
+    "darkModeSupport": true
+  },
+  "win": {
+    "target": "nsis",
+    "icon": "electron-build/icon.png",
+    "publisherName": "kyusho"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "artifactName": "${productName} Setup ${version}.${ext}",
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true
+  },
+  "apk": {
+    "icon": "electron-build/icon.png",
+    "packageName": "ad-lib"
+  }
+}
