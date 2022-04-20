@@ -1,0 +1,6 @@
+{
+  "name": "ad-lib.client",
+  "author": "Kyusho antoineyang99@gmail.com",
+  "version": "1.0.0",
+  "main": "./electron/main.js"
+}

@@ -19,6 +19,7 @@ const App: React.FC = React.memo(function App () {
         <Route path="/" element={ <Homepage /> } />
         <Route path="/idea" element={ <IdeaPage /> } />
         <Route path="/preference" element={ <PreferencePage /> } />
+        <Route path="/*" element={ <Homepage /> } />
       </Routes>
     </Router>
   );

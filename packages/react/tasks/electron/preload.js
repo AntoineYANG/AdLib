@@ -2,13 +2,18 @@
  * @Author: Kanata You 
  * @Date: 2022-04-19 00:17:54 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-04-19 02:19:13
+ * @Last Modified time: 2022-04-20 16:51:04
  */
 
 const { contextBridge, ipcRenderer } = require('electron');
 
 
 // JSB
+
+contextBridge.exposeInMainWorld('electron', {
+  close: () => ipcRenderer.invoke('electron:close'),
+});
+
 contextBridge.exposeInMainWorld('darkMode', {
   toggle: () => ipcRenderer.invoke('dark-mode:toggle'),
 });

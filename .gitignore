@@ -22,3 +22,4 @@ temp
 
 # Electron Builder Cache
 build-cache
+output-tmp

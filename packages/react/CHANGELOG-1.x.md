@@ -1,6 +1,6 @@
 # react v1.x
 
-## 1.0.0 (2022/3/14 - 2022/4/19)
+## 1.0.0 (2022/3/14 - 2022/4/20)
 
 _\<version description\>_
 
@@ -14,6 +14,8 @@ _\<version description\>_
 
 
 ### react
+
++ 🌱 **Support electron app.** - AntoineYANG(814602569@qq.com) 2022/4/20, on _master_
 
 + 🌱 **Added electron & electron-builder** - AntoineYANG(814602569@qq.com) 2022/4/19, on _master_
 
