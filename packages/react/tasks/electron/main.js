@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-04-18 23:52:22 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-04-20 16:51:50
+ * @Last Modified time: 2022-04-20 21:44:49
  */
 
 // 这个脚本用于在完成 build 的 React App 上完成 Electron 打包.
@@ -116,7 +116,7 @@ const createWindow = () => {
     resizable: false,
     title: PACKAGE_NAME,
     webPreferences: {
-      devTools: false,
+      devTools: !isProd,
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       webSecurity: false,
@@ -132,7 +132,9 @@ const createWindow = () => {
 
     useMenu();
 
-    // win.webContents.openDevTools();
+    if (isProd) {
+      win.webContents.openDevTools();
+    }
 
     // macOS apps generally continue running even without any windows open,
     // and activating the app when no windows are available should open a new one.

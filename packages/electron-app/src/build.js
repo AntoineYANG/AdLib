@@ -2,8 +2,9 @@
  * @Author: Kanata You 
  * @Date: 2022-04-20 14:45:15 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-04-20 21:50:14
+ * @Last Modified time: 2022-04-20 22:28:03
  */
+'use strict';
 
 const path = require('path');
 const fs = require('fs');
@@ -64,12 +65,6 @@ const bundleElectronApp = async () => {
     appBundleId: `bundle-${version}`,
     buildVersion: `${version}`,
     dir: entryDir,
-    // download: {
-    //   cacheRoot: path.join(__dirname, '..', 'build-cache'),
-    //   mirrorOptions: {
-    //     mirror: 'https://npm.taobao.org/mirrors/electron-builder-binaries/',
-    //   },
-    // },
     electronZipDir: path.join(__dirname, '..', 'electron-cache'),
     executableName: productName,
     icon: path.join(__dirname, '..', 'public', 'favicon.ico'),
@@ -99,6 +94,6 @@ const bundleElectronApp = async () => {
 };
 
 
-if (require.main === module) {
+if (module === require.main) {
   bundleElectronApp().then(process.exit);
 }

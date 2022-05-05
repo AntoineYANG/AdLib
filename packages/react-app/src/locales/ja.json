@@ -1,0 +1,67 @@
+{
+  "menu": {
+    "app": {
+      "_": "アプリ",
+      "reload": "再起動",
+      "exit": "終了"
+    },
+    "edit": {
+      "_": "コントロール",
+      "undo": "元に戻す",
+      "redo": "やり直し"
+    },
+    "appearance": {
+      "_": "表示",
+      "dark_mode": "ダークモード",
+      "language": {
+        "_": "言語"
+      }
+    }
+  },
+  "control": {
+    "fullscreen": "全画面表示",
+    "minimize": "最小化",
+    "maximize": "最大化",
+    "close": "終了"
+  },
+  "card": {
+    "start": {
+      "label": "新規プレゼン",
+      "desc": "新しいプレゼンを開始しましょう。"
+    },
+    "logs": {
+      "label": "リビュー",
+      "desc": "過去の練習を確認。"
+    },
+    "note": {
+      "label": "メモ",
+      "desc": "単語帳を編集。"
+    },
+    "configs": {
+      "label": "設定",
+      "desc": "実行関数を設定。"
+    }
+  },
+  "home": "ホーム",
+  "back": "帰る",
+  "choose_photo": "お気に入りの写真を選択し、練習を始めましょう。",
+  "button": {
+    "reset": "リセット",
+    "start": "スタート"
+  },
+  "mic_init": "マイク初期化中...",
+  "mic_failed": "マイク初期化失敗。",
+  "test_mic": "マイクをご確認ください。",
+  "audio-interface": {
+    "input": {
+      "on": "麦克风已连接。",
+      "off": "暂未连接麦克风。"
+    },
+    "gain": {
+      "no": "无音频信号。",
+      "too_low": "音量过低，尝试调高增益。",
+      "ok": "音量合适。",
+      "too_high": "音量过高，尝试调低增益。"
+    }
+  }
+}
