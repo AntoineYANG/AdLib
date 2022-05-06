@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-05-05 14:19:54 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-06 17:56:47
+ * @Last Modified time: 2022-05-07 00:02:56
  */
 
 import React from 'react';
@@ -11,9 +11,10 @@ import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import type { TrainPageContext } from '.';
 import VirtualAudioInterface from '@components/virtual-audio-interface';
+import { PhotoMasonryDisplay } from '@components/photo-masonry';
 
 
-const TestMicElement = styled.div({
+const TrainElement = styled.div({
   flexGrow: 1,
   flexShrink: 1,
   marginInline: '8px',
@@ -21,7 +22,7 @@ const TestMicElement = styled.div({
   paddingInline: '60px',
   display: 'flex',
   flexDirection: 'column',
-  flexWrap: 'wrap',
+  flexWrap: 'nowrap',
   alignItems: 'stretch',
   justifyContent: 'space-around',
   overflow: 'hidden scroll',
@@ -33,6 +34,20 @@ const TestMicElement = styled.div({
     textAlign: 'center',
     userSelect: 'none',
   },
+});
+
+const PicList = styled.div({
+  flexGrow: 1,
+  flexShrink: 1,
+  marginInline: '8px',
+  paddingBlock: '20px',
+  paddingInline: '16px',
+  display: 'flex',
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+  alignItems: 'flex-start',
+  justifyContent: 'space-around',
+  overflow: 'hidden scroll',
 });
 
 const Control = styled.div({
@@ -82,39 +97,46 @@ const Button = styled.div({
   transition: 'margin 200ms, padding 200ms',
 });
 
-const TestMic: React.FC<TrainPageContext> = React.memo(function TestMic ({
+const Train: React.FC<TrainPageContext> = React.memo(function Train ({
+  photos,
   next,
-  microphone,
   audioInterface,
 }) {
   const { t } = useTranslation();
 
+  React.useEffect(() => {
+    audioInterface.startRecording();
+
+    return () => {
+      audioInterface.pauseRecording();
+    };
+  }, [audioInterface]);
+
   return (
-    <TestMicElement>
+    <TrainElement>
       <header>
-        {microphone === 'pending' && t('mic_init')}
-        {microphone === 'failed' && t('mic_failed')}
-        {typeof microphone === 'object' && t('test_mic')}
+        {t('training')}
       </header>
-      {
-        typeof microphone === 'object' && (
-          <Footer>
-            <Button
-              onClick={next}
-            >
-              {t('button.start')}
-            </Button>
-          </Footer>
-        )
-      }
+      <PicList>
+        <PhotoMasonryDisplay
+          photos={photos ?? []}
+        />
+      </PicList>
+      <Footer>
+        <Button
+          onClick={next}
+        >
+          {t('button.end')}
+        </Button>
+      </Footer>
       <Control>
         <VirtualAudioInterface
           control={audioInterface}
         />
       </Control>
-    </TestMicElement>
+    </TrainElement>
   );
 });
 
 
-export default TestMic;
+export default Train;

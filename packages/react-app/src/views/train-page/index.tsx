@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-05-05 12:05:54 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-05 16:00:24
+ * @Last Modified time: 2022-05-06 18:01:57
  */
 
 import React from 'react';
@@ -11,12 +11,14 @@ import styled from 'styled-components';
 import ButtonGroups from '@components/button-groups';
 import HomeButton from '@components/home-button';
 import BackButton from '@components/back-button';
-import PhotoMasonry, { PhotoMasonryDisplay, PhotoMasonryHandler } from '@components/photo-masonry';
-import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import TestMic from './test-mic';
-import useMicrophone, { AudioInterface, Microphone, useAudioInterface } from '@utils/use_microphone';
+import useMicrophone, {
+  AudioInterface,
+  Microphone,
+  useAudioInterface
+} from '@utils/use_microphone';
+import Train from './train';
 
 
 const TrainPageElement = styled.div({
@@ -39,20 +41,6 @@ const TrainPageElement = styled.div({
   },
 });
 
-const PicList = styled.div({
-  flexGrow: 1,
-  flexShrink: 1,
-  marginInline: '8px',
-  paddingBlock: '20px',
-  paddingInline: '16px',
-  display: 'flex',
-  flexDirection: 'row',
-  flexWrap: 'wrap',
-  alignItems: 'flex-start',
-  justifyContent: 'space-around',
-  overflow: 'hidden scroll',
-});
-
 enum TrainPageProgress {
   /** 测试麦克风 */
   TEST_MIC,
@@ -61,6 +49,7 @@ enum TrainPageProgress {
 }
 
 export interface TrainPageContext {
+  photos: string[];
   next: () => void;
   microphone: Microphone | 'failed' | 'pending';
   audioInterface: AudioInterface;
@@ -68,7 +57,6 @@ export interface TrainPageContext {
 
 const TrainPage: React.FC = React.memo(function TrainPage () {
   const [progress, setProgress] = React.useState(TrainPageProgress.TEST_MIC);
-  const { t } = useTranslation();
   const photos = /[?&]photos=(?<urls>[^?&]*)/.exec(
     useLocation().search
   )?.groups?.['urls']?.split(',').map(unescape);
@@ -84,7 +72,7 @@ const TrainPage: React.FC = React.memo(function TrainPage () {
 
   const Body = {
     [TrainPageProgress.TEST_MIC]: TestMic,
-    [TrainPageProgress.GOING]: TestMic, // FIXME:
+    [TrainPageProgress.GOING]: Train,
   }[progress];
 
   return (
@@ -94,6 +82,7 @@ const TrainPage: React.FC = React.memo(function TrainPage () {
         <BackButton />
       </ButtonGroups>
       <Body
+        photos={photos ?? []}
         microphone={microphone}
         audioInterface={audioInterface}
         next={() => {
@@ -102,11 +91,6 @@ const TrainPage: React.FC = React.memo(function TrainPage () {
           } as Record<TrainPageProgress, TrainPageProgress>)[p] ?? p));
         }}
       />
-      {/* <PicList>
-        <PhotoMasonryDisplay
-          photos={photos ?? []}
-        />
-      </PicList> */}
     </TrainPageElement>
   );
 });

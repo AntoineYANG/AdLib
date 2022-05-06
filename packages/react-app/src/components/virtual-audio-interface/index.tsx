@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-05-05 15:28:34 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-06 03:07:39
+ * @Last Modified time: 2022-05-07 00:02:28
  */
 
 import React from 'react';
@@ -159,6 +159,50 @@ const InputShape: React.FC<{ connected: boolean }> = React.memo(function InputSh
       </TitleWithTips>
       <Tips>
         {t(`audio-interface.input.${connected ? 'on' : 'off'}`)}
+      </Tips>
+    </Shape>
+  );
+});
+
+const FilterShape: React.FC<{
+  on: boolean;
+  toggle: () => void;
+}> = React.memo(function InputShape ({
+  on,
+  toggle,
+}) {
+  const { t } = useTranslation();
+  
+  return (
+    <Shape
+      viewBox="10 0 80 100"
+      style={{
+        width: '48px',
+        marginInline: '-20px',
+      }}
+    >
+      <circle
+        cx="50"
+        cy="10"
+        r="10"
+        style={{
+          stroke: '#2e2e33',
+          strokeWidth: '6px',
+          fill: on ? '#2fff5a' : '#666a',
+          filter: 'drop-shadow(0 0 2px #000)',
+          cursor: 'pointer',
+        }}
+        onClick={toggle}
+      />
+      <TitleWithTips
+        x={50}
+        y={-12}
+        textAnchor="middle"
+      >
+        FILTER
+      </TitleWithTips>
+      <Tips>
+        {t(`audio-interface.filter`)}
       </Tips>
     </Shape>
   );
@@ -356,6 +400,7 @@ const GainKnob: React.FC<{
             strokeWidth: '1px',
             fill: 'rgb(58,58,58)',
             filter: 'drop-shadow(0 0 2px #000)',
+            transition: 'fill 80ms',
           }}
         />
       </g>
@@ -563,15 +608,16 @@ const VirtualAudioInterface: React.FC<{
   control: AudioInterface;
 }> = React.memo(function VirtualAudioInterface ({ control }) {
   const [hasInput, setInput] = React.useState(control.hasInput);
+  const [filter, setFilter] = React.useState(control.filterOn);
   const [gain, setGain] = React.useState(control.gain);
   const [monitorVol, setMonitorVol] = React.useState(control.monitorVolume);
 
   React.useEffect(() => {
-    control.monitorStatus = true;
-
     const cb = () => {
       setInput(control.hasInput);
+      setFilter(control.filterOn);
       setGain(control.gain);
+      setMonitorVol(control.monitorVolume);
     };
 
     control.subscribe(cb);
@@ -586,6 +632,10 @@ const VirtualAudioInterface: React.FC<{
       <InputShape
         connected={hasInput}
       />
+      <FilterShape
+        on={filter}
+        toggle={() => control.filterOn = !filter}
+      />
       <GainKnob
         control={control}
         value={gain}
@@ -593,7 +643,7 @@ const VirtualAudioInterface: React.FC<{
       />
       <MonitorKnob
         value={monitorVol}
-        setValue={v => setMonitorVol(v)}
+        setValue={v => control.monitorVolume = v}
       />
     </Box>
   );

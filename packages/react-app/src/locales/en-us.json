@@ -57,6 +57,7 @@
       "on": "Microphone is connected.",
       "off": "No microphone is connected."
     },
+    "filter": "Cut off frequencies too low or too high.",
     "gain": {
       "no": "No signal.",
       "too_low": "Volume is too low, try to turn on the gain.",

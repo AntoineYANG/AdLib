@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-04-18 23:52:22 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-04-29 18:26:09
+ * @Last Modified time: 2022-05-07 00:52:39
  */
 'use strict';
 
@@ -17,13 +17,20 @@ const {
   Menu,
   MenuItem,
 } = require('electron');
+const root = isProd
+  ? path.join(__dirname, '..') // FIXME:
+  : path.join(__dirname, '..', '..', '..');
 const { name: PACKAGE_NAME } = require(
   isProd ? path.join(__dirname, '..', 'package.json') : '../../react-app/package.json'
 );
 
 
-const DEFAULT_WINDOW_WIDTH = 1140;
-const DEFAULT_WINDOW_HEIGHT = 740;
+const configs = {
+  cache: 'cache',
+};
+
+// const DEFAULT_WINDOW_WIDTH = 1140;
+// const DEFAULT_WINDOW_HEIGHT = 740;
 
 let send = (channelName, data) => {};
 let close = () => {};
@@ -67,6 +74,18 @@ const useJSB = () => {
     }
     
     return nativeTheme.shouldUseDarkColors;
+  });
+
+  ipcMain.handle('post:audio', (_, data) => {
+    const dir = path.join(root, configs.cache);
+
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir);
+    }
+
+    fs.writeFileSync(path.join(dir, `${data.id}.webw`), Buffer.from(data.data));
+    
+    return dir;
   });
 };
 
