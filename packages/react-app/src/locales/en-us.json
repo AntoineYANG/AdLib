@@ -47,7 +47,11 @@
   "choose_photo": "Choose some photos to start.",
   "button": {
     "reset": "Reset",
-    "start": "Start"
+    "start": "Start",
+    "clear": "Clear Cache"
+  },
+  "configs": {
+    "cache": "Cache"
   },
   "mic_init": "Initializing microphone...",
   "mic_failed": "Failed to load microphone.",
@@ -64,5 +68,6 @@
       "ok": "Volume is ok.",
       "too_high": "Volume is too high, try to turn off the gain."
     }
-  }
+  },
+  "calculating": "Calculating..."
 }

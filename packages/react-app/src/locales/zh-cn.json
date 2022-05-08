@@ -47,7 +47,11 @@
   "choose_photo": "选择对你有帮助的几张图片。",
   "button": {
     "reset": "重置",
-    "start": "开始"
+    "start": "开始",
+    "clear": "清除缓存"
+  },
+  "configs": {
+    "cache": "缓存"
   },
   "mic_init": "初始化麦克风...",
   "mic_failed": "初始化麦克风出错。",
@@ -64,5 +68,6 @@
       "ok": "音量合适。",
       "too_high": "音量过高，尝试调低增益。"
     }
-  }
+  },
+  "calculating": "计算中..."
 }

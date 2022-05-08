@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-05-05 15:28:34 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-07 00:02:28
+ * @Last Modified time: 2022-05-08 19:43:40
  */
 
 import React from 'react';
@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 
 
 const Box = styled.div({
+  transform: 'scale(1.15)',
   flexGrow: 0,
   flexShrink: 0,
   position: 'relative',
@@ -167,7 +168,7 @@ const InputShape: React.FC<{ connected: boolean }> = React.memo(function InputSh
 const FilterShape: React.FC<{
   on: boolean;
   toggle: () => void;
-}> = React.memo(function InputShape ({
+}> = React.memo(function FilterShape ({
   on,
   toggle,
 }) {
@@ -604,13 +605,127 @@ const MonitorKnob: React.FC<{
   );
 });
 
+const RecordingLight = styled.rect<{
+  status: 'recording' | 'stopped' | 'paused';
+}>(({ status }) => ({
+  stroke: '#2e2e33',
+  strokeWidth: '5px',
+  fill: {
+    recording: '#2fff5a',
+    stopped: '#666a',
+    paused: '#fa0',
+  }[status],
+  filter: 'drop-shadow(0 0 2px #000)',
+  cursor: status !== 'stopped' ? 'pointer' : 'default',
+
+  '@keyframes blink': {
+    '0': {
+      fill: '#2fff5a',
+    },
+
+    '50%': {
+      fill: '#888c',
+    }
+  },
+
+  animationName: status === 'recording' ? 'blink' : undefined,
+  animationDuration: '1s',
+  animationIterationCount: 'infinite',
+}));
+
+const RecorderShape: React.FC<{
+  status: 'recording' | 'stopped' | 'paused';
+  toggle: () => void;
+  deleteRecording: () => void;
+}> = React.memo(function RecorderShape ({
+  status,
+  toggle,
+  deleteRecording,
+}) {
+  return (
+    <Shape
+      viewBox="0 0 180 100"
+      style={{
+        width: '120px',
+        marginInlineStart: '24px',
+      }}
+    >
+      <rect
+        x={0}
+        y={3}
+        rx={4}
+        ry={4}
+        width={180}
+        height={100}
+        style={{
+          fill: 'none',
+          stroke: '#eee',
+          strokeWidth: '1px',
+        }}
+      />
+      <rect
+        x={7}
+        y={-7}
+        width={86}
+        height={18}
+        style={{
+          fill: '#101010',
+          stroke: 'none',
+        }}
+      />
+      <text
+        x={50}
+        y={8}
+        textAnchor="middle"
+      >
+        RECORDER
+      </text>
+      <RecordingLight
+        x="16"
+        y="32"
+        width="20"
+        height="14"
+        status={status}
+        onClick={status !== 'stopped' ? toggle : undefined}
+      />
+      <text
+        x={50}
+        y={44}
+      >
+        PAUSE/RESUME
+      </text>
+      <circle
+        cx="26"
+        cy="78"
+        r="14"
+        style={{
+          stroke: '#6d2e33',
+          strokeWidth: '2px',
+          fill: '#222',
+          filter: 'drop-shadow(0 0 2px #000)',
+          cursor: status !== 'stopped' ? 'pointer' : 'default',
+        }}
+        onClick={status !== 'stopped' ? deleteRecording : undefined}
+      />
+      <text
+        x={50}
+        y={84}
+      >
+        DELETE
+      </text>
+    </Shape>
+  );
+});
+
 const VirtualAudioInterface: React.FC<{
   control: AudioInterface;
-}> = React.memo(function VirtualAudioInterface ({ control }) {
+  allowRecording: boolean;
+}> = React.memo(function VirtualAudioInterface ({ control, allowRecording }) {
   const [hasInput, setInput] = React.useState(control.hasInput);
   const [filter, setFilter] = React.useState(control.filterOn);
   const [gain, setGain] = React.useState(control.gain);
   const [monitorVol, setMonitorVol] = React.useState(control.monitorVolume);
+  const [recording, setRecording] = React.useState(control.isRecording);
 
   React.useEffect(() => {
     const cb = () => {
@@ -618,6 +733,7 @@ const VirtualAudioInterface: React.FC<{
       setFilter(control.filterOn);
       setGain(control.gain);
       setMonitorVol(control.monitorVolume);
+      setRecording(control.isRecording);
     };
 
     control.subscribe(cb);
@@ -626,6 +742,30 @@ const VirtualAudioInterface: React.FC<{
       control.unsubscribe(cb);
     }
   }, [control]);
+
+  const toggleRecording = React.useCallback(() => {
+    if (!allowRecording) {
+      return;
+    }
+    
+    if (control.isRecording) {
+      control.pauseRecording();
+    } else {
+      control.startRecording();
+    }
+  }, [control, allowRecording]);
+
+  const deleteRecording = React.useCallback(() => {
+    if (!allowRecording) {
+      return;
+    }
+
+    if (control.isRecording) {
+      control.pauseRecording();
+    }
+
+    control.clear();
+  }, [control, allowRecording]);
 
   return (
     <Box>
@@ -644,6 +784,11 @@ const VirtualAudioInterface: React.FC<{
       <MonitorKnob
         value={monitorVol}
         setValue={v => control.monitorVolume = v}
+      />
+      <RecorderShape
+        status={allowRecording ? (recording ? 'recording' : 'paused') : 'stopped'}
+        toggle={toggleRecording}
+        deleteRecording={deleteRecording}
       />
     </Box>
   );

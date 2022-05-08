@@ -17,6 +17,7 @@ import IdeaPage from './idea-page';
 
 import backgroundLight from '@public/images/background-0.png';
 import TrainPage from './train-page';
+import ConfigPage from './config-page';
 
 
 const Main = styled.main({
@@ -71,6 +72,7 @@ const App: React.FC = React.memo(function App () {
             <Route path="/" element={<Homepage />} />
             <Route path="/idea" element={<IdeaPage />} />
             <Route path="/train" element={<TrainPage />} />
+            <Route path="/configs" element={<ConfigPage />} />
           </Routes>
         </Router>
       </Main>

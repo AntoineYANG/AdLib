@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-04-19 00:17:54 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-07 00:07:55
+ * @Last Modified time: 2022-05-07 16:11:17
  */
 
 const { contextBridge, ipcRenderer } = require('electron');
@@ -46,6 +46,11 @@ contextBridge.exposeInMainWorld('electron', {
 
 contextBridge.exposeInMainWorld('darkMode', {
   toggle: () => ipcRenderer.invoke('dark-mode:toggle'),
+});
+
+contextBridge.exposeInMainWorld('cache', {
+  size: () => ipcRenderer.invoke('cache:size'),
+  clear: () => ipcRenderer.invoke('cache:clear'),
 });
 
 contextBridge.exposeInMainWorld('post', {

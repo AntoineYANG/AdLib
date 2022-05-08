@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-05-05 14:19:54 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-06 17:56:47
+ * @Last Modified time: 2022-05-08 18:58:53
  */
 
 import React from 'react';
@@ -110,6 +110,7 @@ const TestMic: React.FC<TrainPageContext> = React.memo(function TestMic ({
       <Control>
         <VirtualAudioInterface
           control={audioInterface}
+          allowRecording={false}
         />
       </Control>
     </TestMicElement>

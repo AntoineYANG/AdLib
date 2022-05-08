@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-05-05 14:19:54 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-07 00:02:56
+ * @Last Modified time: 2022-05-09 00:32:05
  */
 
 import React from 'react';
@@ -97,6 +97,20 @@ const Button = styled.div({
   transition: 'margin 200ms, padding 200ms',
 });
 
+const TextView = styled.section({
+  flexGrow: 1,
+  flexShrink: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  border: '1px solid',
+
+  '> p': {
+    fontSize: '1.6rem',
+    lineHeight: '1.6em',
+    textDecoration: 'underline',
+  },
+});
+
 const Train: React.FC<TrainPageContext> = React.memo(function Train ({
   photos,
   next,
@@ -104,13 +118,37 @@ const Train: React.FC<TrainPageContext> = React.memo(function Train ({
 }) {
   const { t } = useTranslation();
 
+  const [data, setData] = React.useState<AudioAnalyseResp[]>([]);
+
   React.useEffect(() => {
     audioInterface.startRecording();
 
+    const cb = (d: AudioAnalyseResp) => {
+      if (d.message === 'ok' && d.parsed?.length) {
+        setData(_data => {
+          const which = _data.findIndex(e => e.fileName === d.fileName);
+
+          if (which === -1) {
+            return [..._data, d];
+          }
+
+          const next = [..._data];
+          next[which] = d;
+
+          return next;
+        });
+      }
+    };
+
+    audioInterface.connectAudioParser(cb);
+
     return () => {
+      audioInterface.disconnectFromAudioParser(cb);
       audioInterface.pauseRecording();
     };
   }, [audioInterface]);
+
+  console.log(data);
 
   return (
     <TrainElement>
@@ -122,6 +160,15 @@ const Train: React.FC<TrainPageContext> = React.memo(function Train ({
           photos={photos ?? []}
         />
       </PicList>
+      <TextView>
+        {
+          data.map((d, i) => (
+            <p key={i}>
+              {d.parsed?.[0]?.transcript ?? '...'}
+            </p>
+          ))
+        }
+      </TextView>
       <Footer>
         <Button
           onClick={next}
@@ -131,6 +178,7 @@ const Train: React.FC<TrainPageContext> = React.memo(function Train ({
       </Footer>
       <Control>
         <VirtualAudioInterface
+          allowRecording
           control={audioInterface}
         />
       </Control>

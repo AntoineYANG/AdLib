@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-04-20 23:05:23 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-07 00:32:24
+ * @Last Modified time: 2022-05-09 00:13:45
  */
 
 declare const shortcuts: {
@@ -28,6 +28,11 @@ declare const darkMode: {
   toggle: () => Promise<boolean>;
 };
 
+declare const cache: {
+  size: () => Promise<number>;
+  clear: () => Promise<boolean>;
+};
+
 interface AudioAnalyseData {
   id: string;
   data: ArrayBuffer;
@@ -49,7 +54,7 @@ interface AudioAnalyseResp {
     ...({
       transcript: string;
     })[]
-  ];
+  ] | null;
   parseError: { message: string } | null;
 }
 

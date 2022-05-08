@@ -2,14 +2,14 @@
  * @Author: Kanata You 
  * @Date: 2022-05-05 14:39:37 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-07 00:49:35
+ * @Last Modified time: 2022-05-09 00:29:14
  */
 
 import React from 'react';
 import { nanoid } from 'nanoid';
 
 // import useAlert from '@utils/use-alert';
-import downloadBlobs from './download-blobs';
+// import downloadBlobs from './download-blobs';
 
 
 const ac = new AudioContext();
@@ -124,7 +124,10 @@ export class AudioInterface {
   private monitor: AudioDestinationNode;
 
   private recorder: MediaRecorder | undefined;
-  private isRecording: boolean;
+  private _isRecording: boolean;
+  public get isRecording(): boolean {
+    return this._isRecording;
+  }
   /** 录制数据 */
   private bufferedData: Blob[];
   /** 已上传的长度 */
@@ -134,6 +137,8 @@ export class AudioInterface {
 
   private analyserListeners: ((data: AudioRealTimeData) => void)[];
 
+  private parseListeners: ((resp: AudioAnalyseResp) => void)[];
+
   constructor() {
     this.input = undefined;
     this.filter = {
@@ -142,10 +147,10 @@ export class AudioInterface {
       connected: false,
     };
     this.filter.highPass.type = 'highpass';
-    this.filter.highPass.frequency.setValueAtTime(FREQ_MIN, ac.currentTime);
+    this.filter.highPass.frequency.setValueAtTime(125, ac.currentTime);
     this.filter.highPass.Q.setValueAtTime(0, ac.currentTime);
     this.filter.lowPass.type = 'lowpass';
-    this.filter.lowPass.frequency.setValueAtTime(FREQ_MAX, ac.currentTime);
+    this.filter.lowPass.frequency.setValueAtTime(8000, ac.currentTime);
     this.filter.lowPass.Q.setValueAtTime(0, ac.currentTime);
     this.filter.highPass.connect(this.filter.lowPass);
     this.gainNode = ac.createGain();
@@ -156,12 +161,15 @@ export class AudioInterface {
     this.monitorVolumeNode.gain.value = 0;
     this.monitor = ac.destination;
 
+    this.filter.highPass.connect(this.filter.lowPass);
+    this.filter.lowPass.connect(this.gainNode);
     this.gainNode.connect(this.analyseNode);
     this.analyseNode.connect(this.monitorVolumeNode);
     this.monitorVolumeNode.connect(this.monitor);
 
     this.listeners = [];
     this.analyserListeners = [];
+    this.parseListeners = [];
 
     let analyserCallbackHandler = 0;
 
@@ -192,7 +200,7 @@ export class AudioInterface {
     analyserCallbackHandler = requestAnimationFrame(analyserCallback);
 
     this.recorder = undefined;
-    this.isRecording = false;
+    this._isRecording = false;
     this.bufferedData = []
     this.streamedLength = 0;
   }
@@ -207,7 +215,7 @@ export class AudioInterface {
     }
 
     this.input = microphone;
-    this.input.connect(this.filterOn ? this.filter.highPass : this.gainNode);
+    this.input.connect(this.filter.highPass);
 
     if (microphone.source) {
       this.recorder = ((): MediaRecorder => {
@@ -231,7 +239,7 @@ export class AudioInterface {
       this.streamedLength = 0;
 
       this.recorder.ondataavailable = ev => {
-        if ((ev.data?.size ?? 0) > 0 && this.isRecording) {
+        if ((ev.data?.size ?? 0) > 0 && this._isRecording) {
           this.bufferedData.push(ev.data);
 
           this.streamChunk();
@@ -293,31 +301,61 @@ export class AudioInterface {
     }
   }
 
+  connectAudioParser(cb: (data: AudioAnalyseResp) => void): void {
+    this.parseListeners.push(cb);
+  }
+
+  disconnectFromAudioParser(cb: (data: AudioAnalyseResp) => void): void {
+    const which = this.parseListeners.findIndex(e => e === cb);
+
+    if (which !== -1) {
+      this.parseListeners.splice(which, 1);
+    }
+  }
+
   get filterOn() {
     return this.filter.connected;
   }
 
   set filterOn(on: boolean) {
     this.filter.connected = on;
-    this.input?.connect(on ? this.filter.highPass : this.gainNode);
 
-    this.filter.lowPass.disconnect();
-
-    if (on) {
-      this.input?.connect(this.filter.highPass);
-      this.filter.lowPass.connect(this.gainNode);
-    } else {
-      this.input?.connect(this.gainNode);
-    }
+    this.filter.highPass.frequency.setValueAtTime(on ? FREQ_MIN : 125, ac.currentTime);
+    this.filter.lowPass.frequency.setValueAtTime(on ? FREQ_MAX : 8000, ac.currentTime);
 
     this.fireUpdate();
   }
 
-  private static readonly STREAM_SPAN = 10;
+  private static readonly STREAM_SPAN = 40;
+  private streamId = nanoid(10);
+  // 如果窗口内结果均相同，则视为一条独立语句，更新 streamId
+  private window: string[] = [];
+  private readonly MAX_WINDOW = 5;
+  private clearWindow = () => {
+    this.window = [];
+    this.streamId = nanoid(10);
+  };
+  private updateWindow = (resp: AudioAnalyseResp) => {
+    const d = resp.parsed?.[0]?.transcript;
+
+    if (d) {
+      this.window.push(d);
+
+      if (this.window.length > this.MAX_WINDOW) {
+        this.window.splice(0, 1);
+
+        const isAllSame = this.window.every((d, i, arr) => i === 0 || d === arr[i - 1]);
+
+        if (isAllSame) {
+          this.clearWindow();
+        }
+      }
+    }
+  };
 
   private async streamChunk() {
     const nextCursor = this.streamedLength + AudioInterface.STREAM_SPAN;
-
+    
     if (this.bufferedData.length >= nextCursor) {
       const chunk = this.bufferedData.slice(
         this.streamedLength,
@@ -325,21 +363,28 @@ export class AudioInterface {
       );
       this.streamedLength = nextCursor;
 
-      const id = nanoid(10);
-
       const blob = new Blob(chunk, { type: 'audio/webm' });
 
-      if ((window as any).aaa) {return}
-      (window as any).aaa = true;
-
       const resp = await post.audio({
-        id,
+        id: this.streamId,
         data: await blob.arrayBuffer(),
       });
 
-      downloadBlobs(`${id}.webw`, [blob], 'audio/webm');
+      // downloadBlobs(`${this.streamId}.webw`, [blob], 'audio/webm');
 
-      console.log({ resp });
+      const p = new Promise<void>(resolve => {
+        requestAnimationFrame(() => {
+          this.updateWindow(resp);
+    
+          // console.log(resp);
+    
+          this.parseListeners.forEach(cb => cb(resp));
+         
+          resolve();
+        });
+      });
+
+      await p;
 
       return true;
     }
@@ -351,14 +396,16 @@ export class AudioInterface {
    * 开始录制.
    */
   startRecording(): void {
-    if (this.recorder && !this.isRecording) {
+    if (this.recorder && !this._isRecording) {
+      this.clearWindow();
+      
       if (this.recorder.state === 'paused') {
         this.recorder.resume();
       } else {
-        this.recorder.start(10);
+        this.recorder.start(100);
       }
       
-      this.isRecording = this.recorder.state === 'recording';
+      this._isRecording = this.recorder.state === 'recording';
   
       this.fireUpdate();
     }
@@ -368,9 +415,10 @@ export class AudioInterface {
    * 暂停录制.
    */
   pauseRecording(): void {
-    if (this.recorder && this.isRecording) {
-      this.isRecording = false;
+    if (this.recorder && this._isRecording) {
+      this._isRecording = false;
       this.recorder.pause();
+      this.clearWindow();
   
       this.fireUpdate();
     }

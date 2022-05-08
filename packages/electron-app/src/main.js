@@ -2,12 +2,13 @@
  * @Author: Kanata You 
  * @Date: 2022-04-18 23:52:22 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-07 00:52:39
+ * @Last Modified time: 2022-05-09 00:31:26
  */
 'use strict';
 
 const path = require('path');
 const fs = require('fs');
+const { execSync } = require('child_process');
 const isProd = fs.existsSync('./resources/app/package.json');
 const {
   app,
@@ -24,6 +25,35 @@ const { name: PACKAGE_NAME } = require(
   isProd ? path.join(__dirname, '..', 'package.json') : '../../react-app/package.json'
 );
 
+const pythonDir = isProd
+  ? '' // FIXME:
+  : path.join(root, 'packages', 'python-app');
+
+const {
+  exports: py,
+} = require('../../python-app/package.json');
+
+const pythonInterpreter = isProd
+  ? '' // FIXME:
+  : path.join(pythonDir, 'libs', 'python');
+
+const python = Object.fromEntries(
+  Object.entries(py).map(([name, fn]) => [
+    name,
+    (() => {
+      const file = isProd
+        ? '' // FIXME:
+        : path.join(pythonDir, fn);
+
+      return (...args) => execSync(
+        `${pythonInterpreter} ${file} ${args.join(' ')}`, {
+          encoding: 'utf-8',
+          cwd: pythonDir,
+        }
+      );
+    })()
+  ])
+);
 
 const configs = {
   cache: 'cache',
@@ -76,16 +106,91 @@ const useJSB = () => {
     return nativeTheme.shouldUseDarkColors;
   });
 
+  ipcMain.handle('cache:size', () => {
+    const dir = path.join(root, configs.cache);
+
+    if (!fs.existsSync(dir)) {
+      return 0;
+    }
+
+    let size = 0;
+
+    fs.readdirSync(dir).forEach(n => {
+      const fn = path.join(dir, n);
+
+      size += fs.statSync(fn).size;
+    });
+    
+    return size;
+  });
+
+  ipcMain.handle('cache:clear', () => {
+    const dir = path.join(root, configs.cache);
+
+    if (!fs.existsSync(dir)) {
+      return 0;
+    }
+
+    fs.readdirSync(dir).forEach(n => {
+      const fn = path.join(dir, n);
+
+      fs.rmSync(fn);
+    });
+    
+    return true;
+  });
+
+  let _id = 0;
+
   ipcMain.handle('post:audio', (_, data) => {
+    const receiveTime = Date.now();
     const dir = path.join(root, configs.cache);
 
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir);
     }
 
-    fs.writeFileSync(path.join(dir, `${data.id}.webw`), Buffer.from(data.data));
+    const fn = path.join(dir, `${data.id}.webm`);
+
+    fs.appendFileSync(fn, Buffer.from(data.data));
+
+    const fnTemp = path.join(dir, `tmp-${(_id++) % 1000}.webm`);
+    fs.copyFileSync(fn, fnTemp);
+
+    const lang = data.lang || 'en-EN';
+
+    let res = null;
+    let error = null;
+
+    try {
+      res = JSON.parse(python.parse(fnTemp, lang));
+      // console.log({
+      //   fnTemp,
+      //   res,
+      // });
+    } catch (err) {
+      error = err;
+    } finally {
+      fs.rmSync(fnTemp);
+
+      if (fs.existsSync(fnTemp.replace(/.webm$/, '.wav'))) {
+        fs.rmSync(fnTemp.replace(/.webm$/, '.wav'));
+      }
+    }
+
+    const settleTime = Date.now();
     
-    return dir;
+    return {
+      message: 'ok',
+      fileName: fn,
+      timeInfo: {
+        receiveTime,
+        settleTime,
+        serverCost: settleTime - receiveTime,
+      },
+      parsed: res,
+      parseError: error,
+    };
   });
 };
 

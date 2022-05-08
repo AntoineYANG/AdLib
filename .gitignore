@@ -4,9 +4,13 @@ logs
 
 # Dependency directories
 node_modules/
+libs/
 
 # Espoir cache
 .espoir/
+
+# App cache
+cache/
 
 # Optional npm cache directory
 .npm
