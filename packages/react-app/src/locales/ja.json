@@ -52,6 +52,7 @@
     "end": "終了",
     "back": "帰る"
   },
+  "train_completed": "おめでとう！練習完了しました。",
   "configs": {
     "cache": "カッシュ"
   },

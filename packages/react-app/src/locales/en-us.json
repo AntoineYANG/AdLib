@@ -52,6 +52,7 @@
     "end": "End",
     "back": "Back"
   },
+  "train_completed": "Exercise completed!",
   "configs": {
     "cache": "Cache"
   },

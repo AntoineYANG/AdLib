@@ -52,6 +52,7 @@
     "end": "结束",
     "back": "返回"
   },
+  "train_completed": "恭喜！练习已结束。",
   "configs": {
     "cache": "缓存"
   },
