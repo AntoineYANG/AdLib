@@ -50,8 +50,11 @@
     "start": "スタート",
     "clear": "カッシュを削除",
     "end": "終了",
-    "back": "帰る"
+    "back": "帰る",
+    "yes": "はい",
+    "no": "キャンセル"
   },
+  "should_end_train": "練習を終了してもいいですか？",
   "train_completed": "おめでとう！練習完了しました。",
   "configs": {
     "cache": "カッシュ"

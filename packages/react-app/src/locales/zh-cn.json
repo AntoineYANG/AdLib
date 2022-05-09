@@ -50,8 +50,11 @@
     "start": "开始",
     "clear": "清除缓存",
     "end": "结束",
-    "back": "返回"
+    "back": "返回",
+    "yes": "是",
+    "no": "否"
   },
+  "should_end_train": "确定结束练习吗？",
   "train_completed": "恭喜！练习已结束。",
   "configs": {
     "cache": "缓存"

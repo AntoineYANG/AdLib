@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-05-05 14:19:54 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-09 21:43:53
+ * @Last Modified time: 2022-05-10 01:13:32
  */
 
 import React from 'react';
@@ -12,6 +12,8 @@ import { useTranslation } from 'react-i18next';
 import type { TrainPageContext } from '.';
 import VirtualAudioInterface from '@components/virtual-audio-interface';
 import { PhotoMasonryDisplay } from '@components/photo-masonry';
+import ConfirmDialog from '@components/confirm-dialog';
+import type { TrainLog } from './done';
 
 
 const TrainElement = styled.div({
@@ -107,6 +109,7 @@ const TextView = styled.section({
   display: 'flex',
   flexDirection: 'column',
   border: '1px solid',
+  overflow: 'hidden scroll',
 
   '> p': {
     marginBlock: '0.4em',
@@ -120,8 +123,20 @@ const Train: React.FC<TrainPageContext> = React.memo(function Train ({
   audioInterface,
 }) {
   const { t } = useTranslation();
+  const id = React.useId();
 
   const [data, setData] = React.useState<AudioAnalyseResp[]>([]);
+
+  const durationRef = React.useRef(0);
+  const wordsRef = React.useRef<{ [word: string]: number }>({});
+  const accuracyRef = React.useRef(0);
+  const missionCountRef = React.useRef<{
+    total: number;
+    completed: number;
+  }>({
+    total: 0,
+    completed: 0
+  });
 
   React.useEffect(() => {
     audioInterface.startRecording();
@@ -132,6 +147,19 @@ const Train: React.FC<TrainPageContext> = React.memo(function Train ({
           const which = _data.findIndex(e => e.fileName === d.fileName);
 
           if (which === -1) {
+            d.parsed?.[0]?.transcript.split(/(\s|\/)+/).forEach(word => {
+              if (word.replace(/[ \/]+/g, '').length === 0) {
+                return;
+              }
+              
+              if (!wordsRef.current[word]) {
+                wordsRef.current[word] = 0;
+              }
+
+              wordsRef.current[word] += 1;
+              accuracyRef.current += d.parsed?.[0]?.confidence ?? 1;
+            });
+
             return [..._data, d];
           }
 
@@ -151,6 +179,66 @@ const Train: React.FC<TrainPageContext> = React.memo(function Train ({
     };
   }, [audioInterface]);
 
+  React.useEffect(() => {
+    if (audioInterface.isRecording) {
+      const beginTime = Date.now();
+
+      const handleEnd = () => {
+        const pauseTime = Date.now();
+
+        durationRef.current += (pauseTime - beginTime);
+      };
+
+      return handleEnd;
+    }
+
+    return;
+  }, [audioInterface.isRecording]);
+
+  React.useLayoutEffect(() => {
+    const container = document.getElementById(id);
+
+    container?.scrollTo(0, Infinity);
+  }, [data, id]);
+
+  const [terminate, setTerminate] = React.useState<(confirm: boolean) => void>();
+
+  const handleClickEnd = React.useCallback(() => {
+    if (terminate) {
+      return;
+    }
+
+    new Promise<boolean>(resolve => {
+      if (audioInterface.isRecording) {
+        audioInterface.pauseRecording();
+      }
+      
+      setTerminate(() => resolve);
+    }).then(ok => {
+      setTerminate(undefined);
+
+      const words = Object.values(wordsRef.current).reduce((sum, v) => sum + v, 0);
+
+      const result: TrainLog = {
+        time: Date.now(),
+        analysis: {
+          duration: durationRef.current,
+          words,
+          vocab: Object.keys(wordsRef.current).length,
+          accuracy: words ? accuracyRef.current / words : 0,
+          mission: missionCountRef.current.total,
+          completed: missionCountRef.current.completed,
+        },
+      };
+
+      // console.log({result});
+      
+      if (ok) {
+        next(result);
+      }
+    });
+  }, [terminate, setTerminate, next, audioInterface]);
+
   return (
     <TrainElement>
       <PicList>
@@ -158,7 +246,7 @@ const Train: React.FC<TrainPageContext> = React.memo(function Train ({
           photos={photos ?? []}
         />
       </PicList>
-      <TextView>
+      <TextView id={id}>
         {
           data.map((d, i) => (
             <p key={i}>
@@ -169,7 +257,7 @@ const Train: React.FC<TrainPageContext> = React.memo(function Train ({
       </TextView>
       <Footer>
         <Button
-          onClick={next}
+          onClick={handleClickEnd}
         >
           {t('button.end')}
         </Button>
@@ -180,6 +268,13 @@ const Train: React.FC<TrainPageContext> = React.memo(function Train ({
           control={audioInterface}
         />
       </Control>
+      {terminate && (
+        <ConfirmDialog
+          desc="should_end_train"
+          highlight="yes"
+          handler={terminate}
+        />
+      )}
     </TrainElement>
   );
 });

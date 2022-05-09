@@ -50,8 +50,11 @@
     "start": "Start",
     "clear": "Clear Cache",
     "end": "End",
-    "back": "Back"
+    "back": "Back",
+    "yes": "Yes",
+    "no": "No"
   },
+  "should_end_train": "Do you want to complete the training?",
   "train_completed": "Exercise completed!",
   "configs": {
     "cache": "Cache"

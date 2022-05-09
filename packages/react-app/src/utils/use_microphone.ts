@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-05-05 14:39:37 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-09 20:00:17
+ * @Last Modified time: 2022-05-10 01:02:57
  */
 
 import React from 'react';
@@ -326,7 +326,7 @@ export class AudioInterface {
     this.fireUpdate();
   }
 
-  private static readonly STREAM_SPAN = 10;
+  private static readonly STREAM_SPAN = 40;
   private streamId = nanoid(10);
   // 如果窗口内结果均相同，则视为一条独立语句，更新 streamId
   private window: string[] = [];
@@ -346,6 +346,8 @@ export class AudioInterface {
         this.window.splice(0, 1);
 
         const isAllSame = this.window.every((d, i, arr) => i === 0 || d === arr[i - 1]);
+
+        // console.log({w: this.window, isAllSame});
 
         if (isAllSame) {
           this.clearWindow();
@@ -372,6 +374,8 @@ export class AudioInterface {
         id: this.streamId,
         data: await blob.arrayBuffer(),
       });
+
+      resp.parsed = [{transcript: 'this is my application hello world', confidence: 0.9}];
 
       // downloadBlobs(`${this.streamId}.webw`, [blob], 'audio/webm');
 

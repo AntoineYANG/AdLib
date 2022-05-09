@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-05-09 21:52:14 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-09 22:11:32
+ * @Last Modified time: 2022-05-10 01:19:52
  */
 
 import React from 'react';
@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import type { TrainPageContext } from '.';
 import { useNavigate } from 'react-router-dom';
 import useLocalStorage from '@utils/use_local_storage';
+import TrainResult from '@components/train-result';
 
 
 const DoneElement = styled.div({
@@ -78,27 +79,44 @@ const Button = styled.div({
 
 export interface TrainLog {
   time: number;
+  analysis: {
+    /** 时长 */
+    duration: number;
+    /** 总词数 */
+    words: number;
+    /** 词汇数 */
+    vocab: number;
+    /** 词均识别准确率 */
+    accuracy: number;
+    /** 提示词数量 */
+    mission: number;
+    /** 提示词完成数量 */
+    completed: number;
+  };
 }
 
-const Done: React.FC<TrainPageContext> = React.memo(function Done ({}) {
+const Done: React.FC<TrainPageContext> = React.memo(function Done ({
+  result: log,
+}) {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const [_, setLogs] = useLocalStorage('trainLogs', [] as TrainLog[]);
+  const [[result], setLogs] = useLocalStorage('trainLogs', [] as TrainLog[]);
 
   React.useEffect(() => {
-    const log: TrainLog = {
-      time: Date.now(),
-    };
-
-    setLogs(_logs => _logs.find(e => e.time === log.time) ? _logs : [..._logs, log]);
-  }, []);
+    if (log) {
+      setLogs(logs => [...logs, log]);
+    }
+  }, [log]);
 
   return (
     <DoneElement>
       <header>
         {t('train_completed')}
       </header>
+      <TrainResult
+        result={result}
+      />
       <Footer>
         <Button
           onClick={e => {

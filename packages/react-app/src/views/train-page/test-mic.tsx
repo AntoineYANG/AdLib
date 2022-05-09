@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-05-05 14:19:54 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-08 18:58:53
+ * @Last Modified time: 2022-05-10 00:40:54
  */
 
 import React from 'react';
@@ -100,7 +100,7 @@ const TestMic: React.FC<TrainPageContext> = React.memo(function TestMic ({
         typeof microphone === 'object' && (
           <Footer>
             <Button
-              onClick={next}
+              onClick={() => next()}
             >
               {t('button.start')}
             </Button>
