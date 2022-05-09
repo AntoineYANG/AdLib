@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-05-04 19:10:18 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-05 19:34:37
+ * @Last Modified time: 2022-05-09 21:48:05
  */
 
 import React from 'react';
@@ -22,7 +22,7 @@ const Container = styled.div({
 });
 
 const PicContainer = styled.article<{ selected: boolean }>(({ selected }) => ({
-  // position: 'absolute', // 瀑布流自动置为 absolute
+  position: 'absolute', // 瀑布流自动置为 absolute
   width: 'min-content',
   marginBlockStart: '6px',
   marginBlockEnd: '10px',

@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-05-05 14:19:54 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-09 00:32:05
+ * @Last Modified time: 2022-05-09 21:43:53
  */
 
 import React from 'react';
@@ -98,15 +98,18 @@ const Button = styled.div({
 });
 
 const TextView = styled.section({
-  flexGrow: 1,
+  height: '25vh',
+  fontSize: '1.6rem',
+  lineHeight: '1.6em',
+  paddingInline: '1em',
+  flexGrow: 0,
   flexShrink: 0,
   display: 'flex',
   flexDirection: 'column',
   border: '1px solid',
 
   '> p': {
-    fontSize: '1.6rem',
-    lineHeight: '1.6em',
+    marginBlock: '0.4em',
     textDecoration: 'underline',
   },
 });
@@ -148,13 +151,8 @@ const Train: React.FC<TrainPageContext> = React.memo(function Train ({
     };
   }, [audioInterface]);
 
-  console.log(data);
-
   return (
     <TrainElement>
-      <header>
-        {t('training')}
-      </header>
       <PicList>
         <PhotoMasonryDisplay
           photos={photos ?? []}

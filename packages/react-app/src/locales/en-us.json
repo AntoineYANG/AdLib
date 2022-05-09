@@ -48,7 +48,9 @@
   "button": {
     "reset": "Reset",
     "start": "Start",
-    "clear": "Clear Cache"
+    "clear": "Clear Cache",
+    "end": "End",
+    "back": "Back"
   },
   "configs": {
     "cache": "Cache"

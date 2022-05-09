@@ -48,7 +48,9 @@
   "button": {
     "reset": "重置",
     "start": "开始",
-    "clear": "清除缓存"
+    "clear": "清除缓存",
+    "end": "结束",
+    "back": "返回"
   },
   "configs": {
     "cache": "缓存"

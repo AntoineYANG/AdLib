@@ -2,13 +2,13 @@
  * @Author: Kanata You 
  * @Date: 2022-04-18 23:52:22 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-09 00:31:26
+ * @Last Modified time: 2022-05-09 21:22:10
  */
 'use strict';
 
 const path = require('path');
 const fs = require('fs');
-const { execSync } = require('child_process');
+const { execSync, spawn } = require('child_process');
 const isProd = fs.existsSync('./resources/app/package.json');
 const {
   app,
@@ -37,6 +37,8 @@ const pythonInterpreter = isProd
   ? '' // FIXME:
   : path.join(pythonDir, 'libs', 'python');
 
+let pythonProcessId = 0;
+
 const python = Object.fromEntries(
   Object.entries(py).map(([name, fn]) => [
     name,
@@ -44,13 +46,37 @@ const python = Object.fromEntries(
       const file = isProd
         ? '' // FIXME:
         : path.join(pythonDir, fn);
+      
+      return (...args) => {
+        const pid = pythonProcessId;
 
-      return (...args) => execSync(
-        `${pythonInterpreter} ${file} ${args.join(' ')}`, {
-          encoding: 'utf-8',
-          cwd: pythonDir,
-        }
-      );
+        pythonProcessId += 1;
+
+        const cmd = `${pythonInterpreter} ${file} ${args.join(' ')}`;
+  
+        console.log(
+          `[python:${pid}]`,
+          new Date().toLocaleTimeString(),
+          { cmd }
+        );
+
+        return [{"transcript": "hey hey hey hey hey hey hey hey hey hey", "confidence": 0.98762906}, {"transcript": "hey hey hey hey hey hey hey hey hey hey hey"}];
+
+        const output = execSync(
+          `chcp 65001 & ${cmd}`, {
+            encoding: 'utf-8',
+            cwd: pythonDir,
+          }
+        ).replace(/^Active code page: 65001\r\n/, '');
+
+        console.log(
+          `[python:${pid}]`,
+          new Date().toLocaleTimeString(),
+          { cmd, output }
+        );
+
+        return JSON.parse(output);
+      };
     })()
   ])
 );
@@ -141,6 +167,8 @@ const useJSB = () => {
   });
 
   let _id = 0;
+  let cache = [];
+  let cacheName = null;
 
   ipcMain.handle('post:audio', (_, data) => {
     const receiveTime = Date.now();
@@ -152,10 +180,20 @@ const useJSB = () => {
 
     const fn = path.join(dir, `${data.id}.webm`);
 
+    if (fn !== cacheName) {
+      cache = [];
+      cacheName = fn;
+    }
+
+    cache.push(Buffer.from(data.data));
+
     fs.appendFileSync(fn, Buffer.from(data.data));
 
     const fnTemp = path.join(dir, `tmp-${(_id++) % 1000}.webm`);
-    fs.copyFileSync(fn, fnTemp);
+
+    cache.forEach(b => {
+      fs.appendFileSync(fnTemp, b);
+    });
 
     const lang = data.lang || 'en-EN';
 
@@ -163,19 +201,19 @@ const useJSB = () => {
     let error = null;
 
     try {
-      res = JSON.parse(python.parse(fnTemp, lang));
-      // console.log({
-      //   fnTemp,
-      //   res,
-      // });
+      res = python.parse(fnTemp, lang);
+      console.log({
+        fnTemp,
+        res,
+      });
     } catch (err) {
       error = err;
     } finally {
-      fs.rmSync(fnTemp);
+      // fs.rmSync(fnTemp);
 
-      if (fs.existsSync(fnTemp.replace(/.webm$/, '.wav'))) {
-        fs.rmSync(fnTemp.replace(/.webm$/, '.wav'));
-      }
+      // if (fs.existsSync(fnTemp.replace(/.webm$/, '.wav'))) {
+      //   fs.rmSync(fnTemp.replace(/.webm$/, '.wav'));
+      // }
     }
 
     const settleTime = Date.now();

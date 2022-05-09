@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-05-05 14:39:37 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-09 00:29:14
+ * @Last Modified time: 2022-05-09 20:00:17
  */
 
 import React from 'react';
@@ -326,7 +326,7 @@ export class AudioInterface {
     this.fireUpdate();
   }
 
-  private static readonly STREAM_SPAN = 40;
+  private static readonly STREAM_SPAN = 10;
   private streamId = nanoid(10);
   // 如果窗口内结果均相同，则视为一条独立语句，更新 streamId
   private window: string[] = [];
@@ -334,6 +334,7 @@ export class AudioInterface {
   private clearWindow = () => {
     this.window = [];
     this.streamId = nanoid(10);
+    this.clear();
   };
   private updateWindow = (resp: AudioAnalyseResp) => {
     const d = resp.parsed?.[0]?.transcript;
@@ -365,6 +366,8 @@ export class AudioInterface {
 
       const blob = new Blob(chunk, { type: 'audio/webm' });
 
+      // console.log('send', blob, new Date().toLocaleTimeString());
+      
       const resp = await post.audio({
         id: this.streamId,
         data: await blob.arrayBuffer(),
@@ -417,7 +420,7 @@ export class AudioInterface {
   pauseRecording(): void {
     if (this.recorder && this._isRecording) {
       this._isRecording = false;
-      this.recorder.pause();
+      this.recorder.stop();
       this.clearWindow();
   
       this.fireUpdate();

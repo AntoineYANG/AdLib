@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-05-05 12:05:54 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-06 18:01:57
+ * @Last Modified time: 2022-05-09 21:54:33
  */
 
 import React from 'react';
@@ -19,6 +19,7 @@ import useMicrophone, {
   useAudioInterface
 } from '@utils/use_microphone';
 import Train from './train';
+import Done from './done';
 
 
 const TrainPageElement = styled.div({
@@ -46,6 +47,8 @@ enum TrainPageProgress {
   TEST_MIC,
   /** 进行中 */
   GOING,
+  /** 已完成 */
+  DONE,
 }
 
 export interface TrainPageContext {
@@ -73,6 +76,7 @@ const TrainPage: React.FC = React.memo(function TrainPage () {
   const Body = {
     [TrainPageProgress.TEST_MIC]: TestMic,
     [TrainPageProgress.GOING]: Train,
+    [TrainPageProgress.DONE]: Done,
   }[progress];
 
   return (
@@ -88,6 +92,7 @@ const TrainPage: React.FC = React.memo(function TrainPage () {
         next={() => {
           setProgress(p => (({
             [TrainPageProgress.TEST_MIC]: TrainPageProgress.GOING,
+            [TrainPageProgress.GOING]: TrainPageProgress.DONE,
           } as Record<TrainPageProgress, TrainPageProgress>)[p] ?? p));
         }}
       />

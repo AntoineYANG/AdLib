@@ -2,13 +2,13 @@
  * @Author: Kanata You 
  * @Date: 2022-04-14 18:36:21 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-04-14 19:34:01
+ * @Last Modified time: 2022-05-09 22:09:13
  */
 
 import React from 'react';
 
 
-export type LocalStorageSetter<S> = (val: S) => void;
+export type LocalStorageSetter<S> = (val: S | ((prevState: S) => S)) => void;
 
 const virtualStorage: {
   [name: string]: any;
@@ -155,8 +155,14 @@ const useLocalStorage = <S, RS extends S extends object ? Readonly<S> : S = S ex
   });
 
   /** 返回的 setter：传值更新 localStorage，然后触发更新 */
-  const setter = React.useCallback((s: RS) => {
-    return setStorageItem(key, s, virtual);
+  const setter = React.useCallback((s: RS | ((prev: RS) => RS)) => {
+    return setStorageItem(
+      key,
+      typeof s === 'function' && s.length === 1
+        ? (s as (prev: RS) => RS)(getStorageItem(key, virtual))
+        : s,
+      virtual
+    );
   }, []);
 
   return [state, setter];

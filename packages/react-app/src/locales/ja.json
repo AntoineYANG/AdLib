@@ -48,7 +48,9 @@
   "button": {
     "reset": "リセット",
     "start": "スタート",
-    "clear": "カッシュを削除"
+    "clear": "カッシュを削除",
+    "end": "終了",
+    "back": "帰る"
   },
   "configs": {
     "cache": "カッシュ"

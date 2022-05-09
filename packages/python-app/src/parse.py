@@ -13,21 +13,31 @@ import os
 def parse(webm, lang='en-EN'):
   r = sr.Recognizer()
 
-  file = webm.replace('.webm', '.wav')
+  file_name = webm.replace('.webm', '.wav')
 
-  ffmpeg = os.path.abspath(os.path.join('..', '..', 'lib', 'ffmpeg', 'bin', 'ffmpeg.exe'))
-  command = f"{ffmpeg} -loglevel quiet -i {webm} -ac 1 -ar 16000 {file} -y"
-  os.system(command)
+  ffmpeg = os.path.join(
+    os.path.dirname(__file__),
+    '..',
+    '..',
+    '..',
+    'lib',
+    'ffmpeg',
+    'bin',
+    'ffmpeg'
+  )
+  command = f"{ffmpeg} -loglevel quiet -i {webm} -ac 1 -ar 16000 {file_name} -y"
+  res = os.system(command)
 
-  with sr.AudioFile(file) as source:
+  if res == 1:
+    raise RuntimeError('ffmpeg failed')
+
+  with sr.AudioFile(file_name) as source:
     audio = r.record(source)
-    pass
 
     r.adjust_for_ambient_noise(source)
-    # print("Set minimum energy threshold to {}".format(r.energy_threshold))
 
     try:
-      res = r.recognize_google(audio, show_all=True, language='ja')
+      res = r.recognize_google(audio, show_all=True, language=lang)
 
       if type(res) is list and len(res) == 0:
         return []
@@ -40,8 +50,6 @@ def parse(webm, lang='en-EN'):
 
     pass
 
-  os.remove(file)
-
   pass
 
 
@@ -51,6 +59,6 @@ if __name__ == '__main__':
     print(json.dumps(result), end="")
     exit(0)
   except RuntimeError as err:
-    print(err)
+    print(json.dumps(err), end="")
     exit(1)
   pass

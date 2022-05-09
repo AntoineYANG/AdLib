@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-05-02 16:08:30 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-02 16:44:43
+ * @Last Modified time: 2022-05-09 21:56:01
  */
 
 import React from 'react';
@@ -46,7 +46,7 @@ const HomeButton: React.FC<HomeButtonProps> = React.memo(function HomeButton ({
           if (ok) {
             navigate("/");
           }
-        })
+        });
       }}
       style={{
         marginInline: '8px',
