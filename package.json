@@ -1,11 +1,15 @@
 {
+  "name": "ad-lib",
+  "version": "0.1.0",
+  "description": "A Computer-Assisted Language Learning System. Automatic Self-Talking tutoring.",
+  "license": "GPL",
   "private": true,
   "workspaces": [
     "packages/*"
   ],
   "espoirVersion": 1,
   "contributors": [
-    "Kyoushou antoineyang99@gmail.com"
+    "Kyusho antoineyang99@gmail.com"
   ],
   "repository": {
     "type": "git",
@@ -15,8 +19,15 @@
     "url": "https://github.com/AntoineYANG/AdLib/issues"
   },
   "homepage": "https://github.com/AntoineYANG/AdLib/README.md",
-  "scripts": {},
-  "devDependencies": {},
+  "scripts": {
+    "build": "grunt build"
+  },
+  "devDependencies": {
+    "espoir-cli": "^1.2.1",
+    "grunt": "^1.5.2",
+    "grunt-electron": "^12.0.0",
+    "grunt-electron-installer": "^2.1.0"
+  },
   "peerDependencies": {
     "espoir-cli": "^1.2.1"
   }

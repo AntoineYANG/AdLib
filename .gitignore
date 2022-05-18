@@ -4,12 +4,26 @@ logs
 
 # Dependency directories
 node_modules/
+libs/
 
 # Espoir cache
 .espoir/
+
+# App cache
+cache/
 
 # Optional npm cache directory
 .npm
 
 # Optional eslint cache
 .eslintcache
+
+# Python cache
+__pycache__
+
+# Temporary files
+temp
+
+# Electron Builder Cache
+build-cache
+output-tmp

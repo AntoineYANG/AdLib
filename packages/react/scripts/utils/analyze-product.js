@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-01-25 19:57:58 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-26 00:28:26
+ * @Last Modified time: 2022-03-17 18:02:17
  */
 'use strict';
 
@@ -54,6 +54,10 @@ const groupList = [{
 const analyzeProduct = outputPath => {
   let total = 0;
 
+  if (!fs.existsSync(outputPath)) {
+    return [];
+  }
+  
   const data = readDirAll(outputPath).reduce(
     (list, file) => {
       const name = path.relative(outputPath, file.name).replace(/\\/g, '/');

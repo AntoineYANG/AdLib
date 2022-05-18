@@ -1,0 +1,7 @@
+{
+  "name": "ad-lib.python-app",
+  "pythonVersion": "3.7",
+  "dependencies": {
+    "speechrecognition": "3.7.1"
+  }
+}

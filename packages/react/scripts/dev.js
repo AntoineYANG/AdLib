@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-01-25 21:31:22 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-26 00:27:04
+ * @Last Modified time: 2022-03-20 16:21:07
  */
 'use strict';
 
@@ -20,7 +20,7 @@ const useWebpackConfig = require('./utils/use-webpack-config');
 const EspoirStatsPrinterPlugin = require('./utils/espoir-stats-printer-plugin');
 
 
-const { name: appName, proxy } = require('../package.json');
+const { name: appName } = require('../package.json');
 const paths = require('../configs/path.json');
 
 // dev server configs
@@ -29,8 +29,7 @@ const DEFAULT_PORT = parseInt(process.env.PORT, 10) || 3000;
 
 const { checkBrowsers } = require('react-dev-utils/browsersHelper');
 const {
-  choosePort,
-  prepareProxy
+  choosePort
 } = require('react-dev-utils/WebpackDevServerUtils');
 
 const setup = async () => {
@@ -48,13 +47,6 @@ const setup = async () => {
 
     throw err;
   }
-  
-  // Load proxy config
-  const proxyConfig = prepareProxy(
-    proxy,
-    env.resolvePathInPackage(appName, paths.rootDir),
-    env.resolvePathInPackage(appName, paths.rootDir, paths.referencePath)
-  );
 
   const config = useWebpackConfig('development');
 
@@ -70,7 +62,7 @@ const setup = async () => {
   const devServer = new WebpackDevServer({
     host: HOST,
     port,
-    proxy: proxyConfig,
+    proxy: config.devServer.proxy,
     static: [{
       directory: env.resolvePathInPackage(appName, paths.rootDir, paths.publicPath),
       publicPath: paths.referencePath,
@@ -105,7 +97,7 @@ const watch = ({
     
   ['SIGINT', 'SIGTERM'].forEach(sig => {
     process.on(sig, () => {
-      devServer.close();
+      devServer.stop();
       resolve(0);
     });
   });

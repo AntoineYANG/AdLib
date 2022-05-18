@@ -16,12 +16,19 @@
   },
   "homepage": "https://github.com/AntoineYANG/AdLib/blob/main/packages/node-client/README.md",
   "scripts": {
-    "build": "cd D:\\project\\@github-KANATA\\ad-lib\\packages\\node-client && tsc"
+    "build": "cd D:\\project\\@github-KANATA\\ad-lib\\packages\\node-client && tsc",
+    "start": "node ./bin/index.js"
   },
   "dependencies": {
-    "deepspeech": "^0.9.3"
+    "body-parser": "^1.19.2",
+    "deepspeech": "^0.9.3",
+    "express": "^4.17.3",
+    "multiparty": "^4.2.3"
   },
   "devDependencies": {
+    "@types/body-parser": "^1.19.2",
+    "@types/express": "^4.17.13",
+    "@types/multiparty": "^0.0.33",
     "@types/node": "^17.0.17",
     "typescript": "*"
   },

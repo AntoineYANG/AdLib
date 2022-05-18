@@ -1,0 +1,79 @@
+{
+ "menu": {
+    "app": {
+      "_": "App",
+      "reload": "Reopen",
+      "exit": "Exit"
+    },
+    "edit": {
+      "_": "Control",
+      "undo": "Undo",
+      "redo": "Redo"
+    },
+    "appearance": {
+      "_": "Appearance",
+      "dark_mode": "Dark Mode",
+      "language": {
+        "_": "Language"
+      }
+    }
+  },
+  "control": {
+    "fullscreen": "full screen",
+    "minimize": "minimize",
+    "maximize": "maximize",
+    "close": "close"
+  },
+  "card": {
+    "start": {
+      "label": "Start",
+      "desc": "Start a new presentation."
+    },
+    "logs": {
+      "label": "Review",
+      "desc": "Review the completed presentations."
+    },
+    "note": {
+      "label": "Notepad",
+      "desc": "Edit your word list."
+    },
+    "configs": {
+      "label": "Configuration",
+      "desc": "Customize user settings."
+    }
+  },
+  "home": "home",
+  "back": "back",
+  "choose_photo": "Choose some photos to start.",
+  "button": {
+    "reset": "Reset",
+    "start": "Start",
+    "clear": "Clear Cache",
+    "end": "End",
+    "back": "Back",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "should_end_train": "Do you want to complete the training?",
+  "train_completed": "Exercise completed!",
+  "configs": {
+    "cache": "Cache"
+  },
+  "mic_init": "Initializing microphone...",
+  "mic_failed": "Failed to load microphone.",
+  "test_mic": "Test your microphone.",
+  "audio-interface": {
+    "input": {
+      "on": "Microphone is connected.",
+      "off": "No microphone is connected."
+    },
+    "filter": "Cut off frequencies too low or too high.",
+    "gain": {
+      "no": "No signal.",
+      "too_low": "Volume is too low, try to turn on the gain.",
+      "ok": "Volume is ok.",
+      "too_high": "Volume is too high, try to turn off the gain."
+    }
+  },
+  "calculating": "Calculating..."
+}
