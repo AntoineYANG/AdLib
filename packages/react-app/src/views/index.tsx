@@ -41,27 +41,23 @@ const Main = styled.main({
 });
 
 const App: React.FC = React.memo(function App () {
-  const [phase, setPhase] = React.useState<'welcome' | 'loaded'>('welcome');
+  const [phase, setPhase] = React.useState<'welcome' | 'loading' | 'loaded'>('welcome');
 
   React.useEffect(() => {
     setTimeout(() => {
-      setPhase('loaded');
-    }, 2000);
-  }, [setPhase]);
+      setPhase('loading');
 
-  React.useEffect(() => {
-    if (phase === 'loaded') {
-      electron.fullscreen();
-    }
-  }, [phase]);
+      electron.fullscreen().then(() => {
+        setPhase('loaded');
+      });
+    }, 4000);
+  }, [setPhase]);
 
   const menu = React.useMemo(() => {
     return new Menu();
   }, []);
 
-  return phase === 'welcome' && 0 ? (
-    <WelcomeWindow />
-  ) : (
+  return phase === 'loaded' || IS_DEV ? (
     <React.Fragment>
       <TitleBar
         menu={menu}
@@ -77,7 +73,9 @@ const App: React.FC = React.memo(function App () {
         </Router>
       </Main>
     </React.Fragment>
-  );
+  ) : phase === 'welcome' ? (
+    <WelcomeWindow />
+  ) : null;
 });
 
 export default App;

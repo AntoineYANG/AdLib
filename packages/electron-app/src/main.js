@@ -2,13 +2,13 @@
  * @Author: Kanata You 
  * @Date: 2022-04-18 23:52:22 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-09 22:18:05
+ * @Last Modified time: 2022-05-25 00:02:41
  */
 'use strict';
 
 const path = require('path');
 const fs = require('fs');
-const { execSync, spawn } = require('child_process');
+const { execSync } = require('child_process');
 const isProd = fs.existsSync('./resources/app/package.json');
 const {
   app,
@@ -166,10 +166,6 @@ const useJSB = () => {
     return true;
   });
 
-  let _id = 0;
-  let cache = [];
-  let cacheName = null;
-
   ipcMain.handle('post:audio', (_, data) => {
     const receiveTime = Date.now();
     const dir = path.join(root, configs.cache);
@@ -180,20 +176,7 @@ const useJSB = () => {
 
     const fn = path.join(dir, `${data.id}.webm`);
 
-    if (fn !== cacheName) {
-      cache = [];
-      cacheName = fn;
-    }
-
-    cache.push(Buffer.from(data.data));
-
-    fs.appendFileSync(fn, Buffer.from(data.data));
-
-    const fnTemp = path.join(dir, `tmp-${(_id++) % 1000}.webm`);
-
-    cache.forEach(b => {
-      fs.appendFileSync(fnTemp, b);
-    });
+    fs.writeFileSync(fn, Buffer.from(data.data));
 
     const lang = data.lang || 'en-EN';
 
@@ -201,18 +184,18 @@ const useJSB = () => {
     let error = null;
 
     try {
-      res = python.parse(fnTemp, lang);
-      console.log({
-        fnTemp,
-        res,
-      });
+      res = python.parse(fn, lang);
+
+      if (res?.[0]?.transcript) {
+        res[0].transcript = res[0].transcript.replace(/^[a-z]/, d => d.toLocaleUpperCase());
+      }
     } catch (err) {
       error = err;
     } finally {
-      // fs.rmSync(fnTemp);
+      // fs.rmSync(fn);
 
-      // if (fs.existsSync(fnTemp.replace(/.webm$/, '.wav'))) {
-      //   fs.rmSync(fnTemp.replace(/.webm$/, '.wav'));
+      // if (fs.existsSync(fn.replace(/.webm$/, '.wav'))) {
+      //   fs.rmSync(fn.replace(/.webm$/, '.wav'));
       // }
     }
 
@@ -297,7 +280,7 @@ const createWindow = (url = undefined) => {
     resizable: false,
     title: PACKAGE_NAME,
     webPreferences: {
-      devTools: !isProd,
+      devTools: !isProd && url,
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       webSecurity: false,
@@ -353,7 +336,9 @@ const createWindow = (url = undefined) => {
 
     useMenu();
 
-    win.webContents.openDevTools();
+    if (!isProd && url) {
+      win.webContents.openDevTools();
+    }
 
     // macOS apps generally continue running even without any windows open,
     // and activating the app when no windows are available should open a new one.

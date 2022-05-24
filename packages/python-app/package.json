@@ -16,7 +16,8 @@
   },
   "homepage": "https://github.com/AntoineYANG/AdLib/blob/main/packages/python-app/README.md",
   "exports": {
-    "parse": "./src/parse.py"
+    "parse": "./src/parse.py",
+    "grammar": "./src/grammar.py"
   },
   "scripts": {},
   "dependencies": {},

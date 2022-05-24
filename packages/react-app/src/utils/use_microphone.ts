@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-05-05 14:39:37 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-10 01:02:57
+ * @Last Modified time: 2022-05-19 02:40:05
  */
 
 import React from 'react';
@@ -130,8 +130,8 @@ export class AudioInterface {
   }
   /** 录制数据 */
   private bufferedData: Blob[];
-  /** 已上传的长度 */
-  private streamedLength: number;
+
+  private lastAudioTime: number = 0;
 
   private listeners: ((this: AudioInterface) => void)[];
 
@@ -184,6 +184,10 @@ export class AudioInterface {
           return Math.max(vol, max);
         }, 0);
 
+        if (volume >= 0.25) {
+          this.lastAudioTime = Date.now();
+        }
+
         this.analyserListeners.forEach(cb => {
           cb({
             volume,
@@ -201,8 +205,7 @@ export class AudioInterface {
 
     this.recorder = undefined;
     this._isRecording = false;
-    this.bufferedData = []
-    this.streamedLength = 0;
+    this.bufferedData = [];
   }
 
   useInput(microphone: Microphone): void {
@@ -236,7 +239,6 @@ export class AudioInterface {
       })();
   
       this.bufferedData = [];
-      this.streamedLength = 0;
 
       this.recorder.ondataavailable = ev => {
         if ((ev.data?.size ?? 0) > 0 && this._isRecording) {
@@ -326,54 +328,38 @@ export class AudioInterface {
     this.fireUpdate();
   }
 
-  private static readonly STREAM_SPAN = 40;
   private streamId = nanoid(10);
-  // 如果窗口内结果均相同，则视为一条独立语句，更新 streamId
-  private window: string[] = [];
-  private readonly MAX_WINDOW = 5;
-  private clearWindow = () => {
-    this.window = [];
-    this.streamId = nanoid(10);
-    this.clear();
-  };
-  private updateWindow = (resp: AudioAnalyseResp) => {
-    const d = resp.parsed?.[0]?.transcript;
-
-    if (d) {
-      this.window.push(d);
-
-      if (this.window.length > this.MAX_WINDOW) {
-        this.window.splice(0, 1);
-
-        const isAllSame = this.window.every((d, i, arr) => i === 0 || d === arr[i - 1]);
-
-        // console.log({w: this.window, isAllSame});
-
-        if (isAllSame) {
-          this.clearWindow();
-        }
-      }
-    }
-  };
+  private hasContent = false;
 
   private async streamChunk() {
-    const nextCursor = this.streamedLength + AudioInterface.STREAM_SPAN;
-    
-    if (this.bufferedData.length >= nextCursor) {
-      const chunk = this.bufferedData.slice(
-        this.streamedLength,
-        nextCursor
-      );
-      this.streamedLength = nextCursor;
+    const isSilent = Date.now() - this.lastAudioTime >= 2000;
 
+    if (!isSilent) {
+      // console.log(this.streamId);
+      if (!this.hasContent) {
+        this.pauseRecording();
+        this.clear();
+        this.streamId = nanoid(10);
+        requestAnimationFrame(() => this.startRecording());
+      }
+
+      this.hasContent = true;
+      
+      return false;
+    }
+
+    if (this.bufferedData.length && this.hasContent) {
+      const chunk = this.bufferedData;
       const blob = new Blob(chunk, { type: 'audio/webm' });
-
-      // console.log('send', blob, new Date().toLocaleTimeString());
+      
+      this.hasContent = false;
       
       const resp = await post.audio({
         id: this.streamId,
         data: await blob.arrayBuffer(),
       });
+
+      this.streamId = nanoid(10);
 
       // resp.parsed = [{transcript: 'this is my application hello world', confidence: 0.9}];
 
@@ -381,9 +367,7 @@ export class AudioInterface {
 
       const p = new Promise<void>(resolve => {
         requestAnimationFrame(() => {
-          this.updateWindow(resp);
-    
-          // console.log(resp);
+          console.log(resp);
     
           this.parseListeners.forEach(cb => cb(resp));
          
@@ -392,11 +376,11 @@ export class AudioInterface {
       });
 
       await p;
-
-      return true;
+    } else {
+      this.hasContent = false;
     }
-
-    return false;
+    
+    return true;
   }
 
   /**
@@ -404,12 +388,12 @@ export class AudioInterface {
    */
   startRecording(): void {
     if (this.recorder && !this._isRecording) {
-      this.clearWindow();
+      this.streamId = nanoid(10);
       
       if (this.recorder.state === 'paused') {
         this.recorder.resume();
       } else {
-        this.recorder.start(100);
+        this.recorder.start(1);
       }
       
       this._isRecording = this.recorder.state === 'recording';
@@ -425,7 +409,7 @@ export class AudioInterface {
     if (this.recorder && this._isRecording) {
       this._isRecording = false;
       this.recorder.stop();
-      this.clearWindow();
+      this.streamId = nanoid(10);
   
       this.fireUpdate();
     }
@@ -436,7 +420,7 @@ export class AudioInterface {
    */
   clear(): void {
     this.bufferedData = [];
-    this.streamedLength = 0;
+    this.streamId = nanoid(10);
   }
 
 }

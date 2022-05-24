@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-04-20 23:05:23 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-09 00:13:45
+ * @Last Modified time: 2022-05-25 00:02:13
  */
 
 declare const shortcuts: {
@@ -55,6 +55,10 @@ interface AudioAnalyseResp {
       transcript: string;
     })[]
   ] | null;
+  grammar: null | ({
+    position: [number, number];
+    replacements: string[];
+  })[];
   parseError: { message: string } | null;
 }
 

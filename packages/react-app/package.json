@@ -107,5 +107,9 @@
     "@utils": "./src/utils/",
     "@locales": "./src/locales/",
     "@public": "./public/"
+  },
+  "espoirPackage": "module",
+  "exports": {
+    "./dev": "./scripts/dev.js"
   }
 }

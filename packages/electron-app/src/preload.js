@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-04-19 00:17:54 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-07 16:11:17
+ * @Last Modified time: 2022-05-19 03:07:52
  */
 
 const { contextBridge, ipcRenderer } = require('electron');
@@ -55,6 +55,7 @@ contextBridge.exposeInMainWorld('cache', {
 
 contextBridge.exposeInMainWorld('post', {
   audio: data => ipcRenderer.invoke('post:audio', data),
+  grammar: data => ipcRenderer.invoke('post:grammar', data),
 });
 
 /**

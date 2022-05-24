@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-04-20 23:35:27 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-04-29 15:39:58
+ * @Last Modified time: 2022-05-25 00:01:33
  */
 
 import { getLanguage, setLanguage } from '@locales/i18n';
@@ -61,20 +61,20 @@ export default class Menu {
           accelerator: 'Alt+W'
         },
       ]
-    }, {
-      label: 'edit',
-      subMenu: [
-        {
-          label: 'undo',
-          callback: () => edit.undo(),
-          accelerator: 'Ctrl+Z',
-        },
-        {
-          label: 'redo',
-          callback: () => edit.redo(),
-          accelerator: 'Ctrl+Y',
-        },
-      ]
+    // }, {
+    //   label: 'edit',
+    //   subMenu: [
+    //     {
+    //       label: 'undo',
+    //       callback: () => edit.undo(),
+    //       accelerator: 'Ctrl+Z',
+    //     },
+    //     {
+    //       label: 'redo',
+    //       callback: () => edit.redo(),
+    //       accelerator: 'Ctrl+Y',
+    //     },
+    //   ]
     }, {
       label: 'appearance',
       subMenu: [

@@ -2,18 +2,19 @@
  * @Author: Kanata You 
  * @Date: 2022-05-05 14:19:54 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-11 21:09:05
+ * @Last Modified time: 2022-05-24 23:57:31
  */
 
 import React from 'react';
 import styled from 'styled-components';
-
 import { useTranslation } from 'react-i18next';
+
 import type { TrainPageContext } from '.';
 import VirtualAudioInterface from '@components/virtual-audio-interface';
 import { PhotoMasonryDisplay } from '@components/photo-masonry';
 import ConfirmDialog from '@components/confirm-dialog';
 import type { TrainLog } from './done';
+import GrammarChecker, { GrammarCheckResponseData, GrammarIssue } from '@utils/grammar_checker';
 
 
 const TrainElement = styled.div({
@@ -117,6 +118,60 @@ const TextView = styled.section({
   },
 });
 
+const WrongClause = styled.span({
+  position: 'relative',
+  color: 'red',
+  display: 'inline-flex',
+  flexDirection: 'column',
+
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: '1.28em',
+    height: '0.24em',
+    width: '100%',
+    backgroundImage: `
+      linear-gradient(135deg, transparent 42%, red, transparent 58%),
+      linear-gradient(45deg, transparent 42%, red, transparent 58%)
+    `,
+    backgroundSize: '0.4em 0.4em',
+    backgroundRepeat: 'repeat-x, repeat-x',
+  },
+
+  '> span.root': {
+    color: 'orangered',
+    display: 'inline-flex',
+    flexDirection: 'column',
+    position: 'relative',
+    width: '1px',
+    overflow: 'visible',
+    fontSize: '80%',
+
+    '> .body': {
+      position: 'relative',
+      display: 'flex',
+      flexDirection: 'column',
+      border: '1px solid',
+      paddingInline: '0.2em',
+      minWidth: '100px',
+      width: 'fit-content',
+
+      '> .replace': {
+        whiteSpace: 'nowrap',
+        textOverflow: 'ellipsis',
+      },
+
+      '> .msg': {
+        paddingBlockStart: '0.2em',
+        fontStyle: 'italic',
+        width: 'max-content',
+      },
+    },
+  },
+});
+
+const grammarCache: { [text: string]: GrammarIssue[] } = {};
+
 const Train: React.FC<TrainPageContext> = React.memo(function Train ({
   photos,
   next,
@@ -125,7 +180,10 @@ const Train: React.FC<TrainPageContext> = React.memo(function Train ({
   const { t } = useTranslation();
   const id = React.useId();
 
-  const [data, setData] = React.useState<AudioAnalyseResp[]>([]);
+  const [data, setData] = React.useState<{
+    text: string;
+    grammar: GrammarIssue[] | undefined | null;
+  }[]>([]);
 
   const durationRef = React.useRef(0);
   const wordsRef = React.useRef<{ [word: string]: number }>({});
@@ -144,29 +202,25 @@ const Train: React.FC<TrainPageContext> = React.memo(function Train ({
     const cb = (d: AudioAnalyseResp) => {
       if (d.message === 'ok' && d.parsed?.length) {
         setData(_data => {
-          const which = _data.findIndex(e => e.fileName === d.fileName);
+          const text = d.parsed?.[0]?.transcript ?? '...';
 
-          if (which === -1) {
-            d.parsed?.[0]?.transcript.split(/(\s|\/)+/).forEach(word => {
-              if (word.replace(/[ \/]+/g, '').length === 0) {
-                return;
-              }
-              
-              if (!wordsRef.current[word]) {
-                wordsRef.current[word] = 0;
-              }
+          text.split(/(\s|\/)+/).forEach(word => {
+            if (word.replace(/[ \/]+/g, '').length === 0) {
+              return;
+            }
+            
+            if (!wordsRef.current[word]) {
+              wordsRef.current[word] = 0;
+            }
 
-              wordsRef.current[word] += 1;
-              accuracyRef.current += d.parsed?.[0]?.confidence ?? 1;
-            });
+            wordsRef.current[word] += 1;
+            accuracyRef.current += d.parsed?.[0]?.confidence ?? 1;
+          });
 
-            return [..._data, d];
-          }
-
-          const next = [..._data];
-          next[which] = d;
-
-          return next;
+          return [..._data, {
+            text,
+            grammar: grammarCache[text]
+          }].splice(-5);
         });
       }
     };
@@ -198,7 +252,7 @@ const Train: React.FC<TrainPageContext> = React.memo(function Train ({
   React.useLayoutEffect(() => {
     const container = document.getElementById(id);
 
-    container?.scrollTo(0, Infinity);
+    container?.scrollTo(0, 0);
   }, [data, id]);
 
   const [terminate, setTerminate] = React.useState<(confirm: boolean) => void>();
@@ -239,6 +293,37 @@ const Train: React.FC<TrainPageContext> = React.memo(function Train ({
     });
   }, [terminate, setTerminate, next, audioInterface, wordsRef, accuracyRef, missionCountRef]);
 
+  React.useEffect(() => {
+    for (const d of data) {
+      if (d.grammar === undefined) {
+        setData(_data => _data.map(item => item === d ? {
+          text: d.text,
+          grammar: null
+        } : item));
+
+        console.log('test', d.text);
+
+        GrammarChecker.check({
+          text: d.text,
+          language: 'en-US', // FIXME:
+        }).then(res => {
+          console.log('grammar', res);
+
+          if (res === null) {
+            return;
+          }
+
+          grammarCache[d.text] = res.matches;
+
+          setData(_data => _data.map(d => ({
+            text: d.text,
+            grammar: grammarCache[d.text]
+          })));
+        });
+      }
+    }
+  }, [data[data.length - 1]?.text, setData]);
+
   return (
     <TrainElement>
       <PicList>
@@ -248,9 +333,75 @@ const Train: React.FC<TrainPageContext> = React.memo(function Train ({
       </PicList>
       <TextView id={id}>
         {
-          data.map((d, i) => (
-            <p key={i}>
-              {d.parsed?.[0]?.transcript ?? '...'}
+          [...data].reverse().map((d, i) => (
+            <p
+              key={i}
+              style={{
+                textDecoration: 'none',
+              }}
+            >
+              {`>> `}
+              {
+                d.grammar ? (
+                  (() => {
+                    const elements: JSX.Element[] = [];
+
+                    let cursor = 0;
+
+                    d.grammar.sort(
+                      (a, b) => a.offset - b.offset
+                    ).forEach(issue => {
+                      if (issue.offset > cursor) {
+                        elements.push(
+                          <span>
+                            {d.text.slice(cursor, issue.offset)}
+                          </span>
+                        );
+                      }
+
+                      elements.push(
+                        <WrongClause>
+                          {d.text.slice(issue.offset, issue.offset + issue.length)}
+                          <span className="root">
+                            <span className="body">
+                              {issue.replacements.length && (
+                                <span className="replace">
+                                  {issue.replacements.map(d => d.value).join(', ')}
+                                </span>
+                              )}
+                              {issue.message && (
+                                <span className="msg">
+                                  {issue.message}
+                                </span>
+                              )}
+                            </span>
+                          </span>
+                        </WrongClause>
+                      );
+
+                      cursor = issue.offset + issue.length;
+                    });
+
+                    if (cursor < d.text.length) {
+                      elements.push(
+                        <span>
+                          {d.text.slice(cursor)}
+                        </span>
+                      );
+                    }
+
+                    return (
+                      <>
+                        {elements.map((e, i) => (
+                          <React.Fragment key={i}>
+                            {e}
+                          </React.Fragment>
+                        ))}
+                      </>
+                    );
+                  })()
+                ) : d.text
+              }
             </p>
           ))
         }

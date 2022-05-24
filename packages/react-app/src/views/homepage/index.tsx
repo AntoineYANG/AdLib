@@ -2,13 +2,13 @@
  * @Author: Kanata You 
  * @Date: 2022-04-29 17:52:55 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-02 17:54:59
+ * @Last Modified time: 2022-05-24 21:30:23
  */
 
 import React from 'react';
 import styled from 'styled-components';
 
-import CardButton from '@components/card-button';
+import CardButton, { CardButtonMain } from '@components/card-button';
 
 import lottieSpeaking from '@components/card-button/speaking.json';
 import lottieCalender from '@components/card-button/calendar.json';
@@ -36,6 +36,7 @@ const HomepageElement = styled.div({
 });
 
 const CardList = styled.div({
+  position: 'relative',
   flexGrow: 1,
   flexShrink: 1,
   paddingBlock: '40px',
@@ -44,28 +45,28 @@ const CardList = styled.div({
   flexDirection: 'row',
   flexWrap: 'wrap',
   alignItems: 'flex-start',
-  justifyContent: 'space-around',
+  justifyContent: 'flex-end',
 });
 
 const Homepage: React.FC = React.memo(function Homepage () {
   return (
     <HomepageElement>
       <CardList>
-        <CardButton
+        <CardButtonMain
           label="start"
           lottie={lottieSpeaking}
           path="/idea"
         />
-        <CardButton
+        {/* <CardButton
           label="logs"
           lottie={lottieCalender}
           path="/logs"
-        />
-        <CardButton
+        /> */}
+        {/* <CardButton
           label="note"
           lottie={lottieNotebook}
           path="/note"
-        />
+        /> */}
         <CardButton
           label="configs"
           lottie={lottieSettings}
