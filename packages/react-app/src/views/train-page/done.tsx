@@ -88,9 +88,11 @@ export interface TrainLog {
     vocab: number;
     /** 词均识别准确率 */
     accuracy: number;
-    /** 提示词数量 */
+    // /** 提示词数量 */
+    /** 句子总数 */
     mission: number;
-    /** 提示词完成数量 */
+    // /** 提示词完成数量 */
+    /** 语法正确的句子数量 */
     completed: number;
   };
 }

@@ -324,6 +324,22 @@ const Train: React.FC<TrainPageContext> = React.memo(function Train ({
     }
   }, [data[data.length - 1]?.text, setData]);
 
+  React.useEffect(() => {
+    missionCountRef.current = data.reduce<{ total: number; completed: number; }>((prev, v) => {
+      if (!v.grammar) {
+        return prev;
+      }
+
+      return {
+        total: prev.total + 1,
+        completed: prev.completed + (v.grammar.length ? 0 : 1)
+      };
+    }, {
+      total: 0,
+      completed: 0
+    });
+  }, [data[data.length - 1], missionCountRef]);
+
   return (
     <TrainElement>
       <PicList>

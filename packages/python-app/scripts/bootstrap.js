@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-05-07 14:41:22 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-07 16:57:58
+ * @Last Modified time: 2022-05-30 15:48:56
  */
 
 const path = require('path');
@@ -47,22 +47,42 @@ const install = async () => {
 
   // Windows 系统需要保证模块能够找到 flac 命令工具
   if (process.platform === 'win32') {
-    const target = path.join(
-      libsDir,
-      'Library',
-      'bin',
-      'flac.exe'
+    // 解决
+    const srInitModule = path.resolve(
+      libsDir, 'Lib', 'site-packages', 'speech_recognition', '__init__.py'
     );
 
-    const p0 = path.resolve(__dirname, '..', '..', '..', '.espoir', '.bin', 'flac');
-    const p1 = path.resolve(__dirname, '..', 'flac');
-
-    if (!fs.existsSync(p0)) {
-      fs.symlinkSync(target, p0);
+    if (fs.existsSync(srInitModule)) {
+      fs.writeFileSync(
+        srInitModule,
+        fs.readFileSync(srInitModule, {
+          encoding: 'utf-8'
+        }).replace(
+          'flac_converter = shutil_which("flac")  # check for installed version first',
+          `flac_converter = "${path.join(libsDir, 'Library', 'bin', 'flac.exe').replace(/\\/g, '\\\\')}"  # HACK`
+        ),
+        {
+          encoding: 'utf8'
+        }
+      );
     }
 
-    if (!fs.existsSync(p1)) {
-      fs.symlinkSync(target, p1);
+    // 解决 _win32api 找不到文件 bug
+    const subprocessModule = path.resolve(libsDir, 'Lib', 'subprocess.py');
+
+    if (fs.existsSync(subprocessModule)) {
+      fs.writeFileSync(
+        subprocessModule,
+        fs.readFileSync(subprocessModule, {
+          encoding: 'utf-8'
+        }).replace(
+          'shell=False, cwd=None, env=None, universal_newlines=None',
+          'shell=True, cwd=None, env=None, universal_newlines=None'
+        ),
+        {
+          encoding: 'utf8'
+        }
+      );
     }
   }
 

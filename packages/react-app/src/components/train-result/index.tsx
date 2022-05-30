@@ -38,8 +38,8 @@ export interface TrainResultData {
   variety: number;
   /** 发音 */
   pronounce: number;
-  /** 任务达成 */
-  mission: number;
+  /** 语法 */
+  grammar: number;
 }
 
 const LEVEL = ['F', 'E', 'D', 'C', 'B', 'A', 'S', 'SS'];
@@ -121,9 +121,9 @@ const analyse = (log: TrainLog): TrainResultData => {
     pronounce: interpolate([
       0.5, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9
     ], log.analysis.accuracy),
-    mission: interpolate([
-      0, 0.1, 0.5, 0.6, 0.7, 0.8, 0.85, 0.95
-    ], log.analysis.mission ? log.analysis.completed / log.analysis.mission : 0.3),
+    grammar: interpolate([
+      0.5, 0.6, 0.72, 0.78, 0.82, 0.88, 0.92, 0.99
+    ], log.analysis.mission ? log.analysis.completed / log.analysis.mission : 0.8),
   };
 };
 

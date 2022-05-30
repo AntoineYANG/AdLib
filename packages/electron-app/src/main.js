@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-04-18 23:52:22 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-25 00:02:41
+ * @Last Modified time: 2022-05-30 15:25:44
  */
 'use strict';
 
@@ -60,10 +60,8 @@ const python = Object.fromEntries(
           { cmd }
         );
 
-        // return [{"transcript": "hey hey hey hey hey hey hey hey hey hey", "confidence": 0.98762906}, {"transcript": "hey hey hey hey hey hey hey hey hey hey hey"}];
-
         const output = execSync(
-          `chcp 65001 & ${cmd}`, {
+          cmd, {
             encoding: 'utf-8',
             cwd: pythonDir,
           }
