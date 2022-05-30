@@ -18,9 +18,6 @@ def parse(webm, lang='en-EN'):
   ffmpeg = os.path.join(
     os.path.dirname(__file__),
     '..',
-    '..',
-    '..',
-    'lib',
     'ffmpeg',
     'bin',
     'ffmpeg'

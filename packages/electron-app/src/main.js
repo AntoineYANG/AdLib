@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-04-18 23:52:22 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-05-30 15:25:44
+ * @Last Modified time: 2022-05-30 20:21:18
  */
 'use strict';
 
@@ -18,24 +18,38 @@ const {
   Menu,
   MenuItem,
 } = require('electron');
-const root = isProd
-  ? path.join(__dirname, '..') // FIXME:
-  : path.join(__dirname, '..', '..', '..');
+const root = path.join(__dirname, '..', '..', '..');
 const { name: PACKAGE_NAME } = require(
   isProd ? path.join(__dirname, '..', 'package.json') : '../../react-app/package.json'
 );
 
 const pythonDir = isProd
-  ? '' // FIXME:
+  ? path.join(root, 'python')
   : path.join(root, 'packages', 'python-app');
 
 const {
   exports: py,
-} = require('../../python-app/package.json');
+} = require(path.join(pythonDir, 'package.json'));
 
-const pythonInterpreter = isProd
-  ? '' // FIXME:
-  : path.join(pythonDir, 'libs', 'python');
+const pythonInterpreter = path.join(pythonDir, 'libs', 'python');
+
+const configs = {
+  cache: 'cache',
+};
+
+const log = isProd ? (...args) => {
+  const now = new Date();
+
+  fs.appendFileSync(
+    path.join(root, configs.cache, `${now.getMonth() + 1}-${now.getDate}.log`),
+    `${now.toUTCString()}\n  ${
+      args.map(JSON.stringify).join('  ')
+    }\n\n`,
+    {
+      encoding: 'utf-8'
+    }
+  );
+} : console.log;
 
 let pythonProcessId = 0;
 
@@ -43,9 +57,7 @@ const python = Object.fromEntries(
   Object.entries(py).map(([name, fn]) => [
     name,
     (() => {
-      const file = isProd
-        ? '' // FIXME:
-        : path.join(pythonDir, fn);
+      const file = path.join(pythonDir, fn);
       
       return (...args) => {
         const pid = pythonProcessId;
@@ -54,7 +66,7 @@ const python = Object.fromEntries(
 
         const cmd = `${pythonInterpreter} ${file} ${args.join(' ')}`;
   
-        console.log(
+        log(
           `[python:${pid}]`,
           new Date().toLocaleTimeString(),
           { cmd }
@@ -67,7 +79,7 @@ const python = Object.fromEntries(
           }
         ).replace(/^Active code page: 65001\r\n/, '');
 
-        console.log(
+        log(
           `[python:${pid}]`,
           new Date().toLocaleTimeString(),
           { cmd, output }
@@ -78,10 +90,6 @@ const python = Object.fromEntries(
     })()
   ])
 );
-
-const configs = {
-  cache: 'cache',
-};
 
 // const DEFAULT_WINDOW_WIDTH = 1140;
 // const DEFAULT_WINDOW_HEIGHT = 740;

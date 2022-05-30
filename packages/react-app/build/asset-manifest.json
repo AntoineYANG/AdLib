@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "D:/project/@github-KANATA/ad-lib/packages/react-app/static/css/main.58afe535.css",
-    "main.js": "D:/project/@github-KANATA/ad-lib/packages/react-app/static/js/main.c6daddf4.js",
+    "main.js": "D:/project/@github-KANATA/ad-lib/packages/react-app/static/js/main.4ddf41ec.js",
     "static/media/background-0.png": "D:/project/@github-KANATA/ad-lib/packages/react-app/static/media/background-0.5948f245.png",
     "static/media/icon256.png": "D:/project/@github-KANATA/ad-lib/packages/react-app/static/media/icon256.28ffd65e.png",
     "index.html": "D:/project/@github-KANATA/ad-lib/packages/react-app/index.html",
     "static/media/javascript,__webpack_public_path__ = __webpack_base_uri__ = htmlWebpackPluginPublicPath;": "D:/project/@github-KANATA/ad-lib/packages/react-app/static/media/javascript,__webpack_public_path__ = __webpack_base_uri__ = htmlWebpackPluginPublicPath;.1feff74f.bin",
     "main.58afe535.css.map": "D:/project/@github-KANATA/ad-lib/packages/react-app/static/css/main.58afe535.css.map",
-    "main.c6daddf4.js.map": "D:/project/@github-KANATA/ad-lib/packages/react-app/static/js/main.c6daddf4.js.map"
+    "main.4ddf41ec.js.map": "D:/project/@github-KANATA/ad-lib/packages/react-app/static/js/main.4ddf41ec.js.map"
   },
   "entrypoints": [
     "static/css/main.58afe535.css",
-    "static/js/main.c6daddf4.js"
+    "static/js/main.4ddf41ec.js"
   ]
 }
